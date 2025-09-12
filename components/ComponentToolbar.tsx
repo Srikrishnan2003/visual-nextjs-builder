@@ -5,6 +5,7 @@ import AddConfirmDialog from "./dialogs/AddConfirmDialog";
 const COMPONENTS = [
   { type: "Button", label: "Button" },
   { type: "Div", label: "Div Container" },
+  { type: "FlexBox", label: "Flex Container" },
 ];
 
 export default function ComponentToolbar() {
