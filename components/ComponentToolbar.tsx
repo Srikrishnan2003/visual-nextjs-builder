@@ -12,7 +12,7 @@ export default function ComponentToolbar() {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
 
   return (
-    <div className="p-2 border-r h-full bg-muted">
+    <div className="p-4 h-full">
       <h2 className="text-xs font-semibold mb-2">Components</h2>
       {COMPONENTS.map((comp) => (
         <button
@@ -31,3 +31,4 @@ export default function ComponentToolbar() {
     </div>
   );
 }
+

@@ -76,7 +76,7 @@ export function PropertiesPanel() {
                   value={value}
                   onValueChange={(newVal) => updateProps(selectedComponent.id, { [field.key]: newVal })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <SelectValue placeholder={`Select ${field.label}`} />
                   </SelectTrigger>
                   <SelectContent>
@@ -108,3 +108,4 @@ export function PropertiesPanel() {
     </div>
   );
 }
+

@@ -40,8 +40,8 @@ export default function CollapsiblePanel({
             {!collapsed && <div className="h-full">{children}</div>}
             <div
                 className={cn(
-                    "absolute top-2",
-                    side === "left" ? "right-0" : "left-0"
+                    "absolute top-1/2 -translate-y-1/2 z-10",
+                    side === "left" ? "right-[-16px]" : "left-[-16px]"
                 )}
             >
                 {toggleButton}

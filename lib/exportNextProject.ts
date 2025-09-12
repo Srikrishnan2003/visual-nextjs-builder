@@ -4,7 +4,7 @@ import { FileNode } from "@/stores/useFileSystemStore";
 import { generateCodeFromTree } from "./codeGenerator";
 
 // helper: generate package.json
-function generatePackageJson() {
+function generatePackageJson(dependencies: Record<string, string>, devDependencies: Record<string, string>) {
   return JSON.stringify(
     {
       name: "exported-nextjs-project",
@@ -16,19 +16,8 @@ function generatePackageJson() {
         start: "next start",
         lint: "next lint",
       },
-      dependencies: {
-        next: "14.2.3",
-        react: "18.2.0",
-        "react-dom": "18.2.0",
-      },
-      devDependencies: {
-        typescript: "^5.0.0",
-        "@types/react": "^18.2.0",
-        "@types/node": "^20.0.0",
-        tailwindcss: "3.4.3", // ✅ Tailwind v3
-        postcss: "^8.4.0",
-        autoprefixer: "^10.4.0"
-      },
+      dependencies: dependencies,
+      devDependencies: devDependencies,
     },
     null,
     2
@@ -73,7 +62,8 @@ module.exports = {
   ],
   theme: { extend: {} },
   plugins: [],
-};`;
+};
+`;
 }
 
 
@@ -83,7 +73,8 @@ function generatePostcssConfig() {
     tailwindcss: {},
     autoprefixer: {},
   },
-};`;
+};
+`;
 }
 
 function generateGlobalsCss() {
@@ -107,31 +98,86 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>{children}</body>
     </html>
   );
-}`;
+}
+`;
+}
+
+function generateGitignore() {
+    return `
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+`;
 }
 
 
 
-export async function exportNextProject(root: FileNode) {
+export async function exportNextProject(root: FileNode, dependencies: Record<string, string>, devDependencies: Record<string, string>) {
   const zip = new JSZip();
 
   // Core config files
-  zip.file("package.json", generatePackageJson());
+  zip.file("package.json", generatePackageJson(dependencies, devDependencies));
   zip.file("tsconfig.json", generateTsConfig());
   zip.file("tailwind.config.js", generateTailwindConfig());
   zip.file("postcss.config.js", generatePostcssConfig());
-  zip.file("next.config.js", `/** @type {import('next').NextConfig} */\nmodule.exports = {};`);
+  zip.file("next.config.js", `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+};
+
+module.exports = nextConfig;`);
   zip.file("next-env.d.ts", `/// <reference types="next" />\n/// <reference types="next/types/global" />`);
   zip.file("README.md", "# Exported Next.js Project\nRun with:\n\n```bash\nnpm install\nnpm run dev\n```");
+  zip.file(".gitignore", generateGitignore());
 
   // Project folders
   const appFolder = zip.folder("app");
   const compFolder = zip.folder("components");
-  zip.folder("public");
-  zip.folder("styles")?.file("globals.css", generateGlobalsCss());
+  const publicFolder = zip.folder("public");
+  const publicFiles = ["file.svg", "globe.svg", "next.svg", "vercel.svg", "window.svg"];
 
-  // Add layout.tsx
+  for (const file of publicFiles) {
+    const response = await fetch(`/public/${file}`);
+    const blob = await response.blob();
+    publicFolder?.file(file, blob);
+  }
+
+  // Add layout.tsx and globals.css to app folder
   appFolder?.file("layout.tsx", generateLayoutTsx());
+  appFolder?.file("globals.css", generateGlobalsCss());
+
 
   // Find index.tsx and components
   const findFiles = (node: FileNode) => {
@@ -151,4 +197,3 @@ export async function exportNextProject(root: FileNode) {
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, "nextjs-project.zip");
 }
-

@@ -65,7 +65,7 @@ export default function CustomComponentConfirmDialog({ componentType, onClose }:
             <DialogTitle>Custom Component</DialogTitle>
             <DialogContent className="space-y-4">
                 <h2 className="font-bold text-sm">
-                    Add "{componentType}" to which page?
+                    Add &quot;{componentType}&quot; to which page?
                 </h2>
                 <div className="space-y-2">
                     {pageFiles.map((file) => (

@@ -14,10 +14,19 @@ function generateCode(
   const { type, props, children = [] } = node;
   const indent = "  ".repeat(indentLevel);
 
-  const { children: innerText, ...restProps } = props || {};
+  const { children: innerText, ...restProps } = props || { children: '' };
 
   const propString = Object.entries(restProps)
-    .map(([key, value]) => `${key}="${value}"`)
+    .map(([key, value]) => {
+      if (typeof value === "boolean") {
+        return value ? key : "";
+      }
+      if (typeof value === "number") {
+        return `${key}={${value}}`;
+      }
+      return `${key}="${value}"`;
+    })
+    .filter(Boolean)
     .join(" ");
 
   // Check if this is a custom component

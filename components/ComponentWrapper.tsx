@@ -31,13 +31,15 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
     e.dataTransfer.setData("componentId", node.id);
   };
 
+  const isChild = !!node.parentId;
+
   const style: React.CSSProperties = {
-    top: node.y ?? 0,
-    left: node.x ?? 0,
-    position: "absolute",
+    top: !isChild ? node.y ?? 0 : undefined,
+    left: !isChild ? node.x ?? 0 : undefined,
+    position: !isChild ? "absolute" : "relative",
     padding: 4,
     border: isSelected ? "2px solid #3b82f6" : "1px solid #ccc",
-    cursor: "move",
+    cursor: !isChild ? "move" : "default",
   };
 
   // 🔍 Helper: Find canvasTree for a custom component
@@ -67,7 +69,7 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
   if (Comp) {
     return (
       <div
-        draggable
+        draggable={!isChild}
         onClick={handleClick}
         onDragStart={handleDragStart}
         onContextMenu={handleContextMenu}

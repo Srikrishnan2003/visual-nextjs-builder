@@ -1,17 +1,9 @@
-{
-  "name": "mock-2",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+export const dummyPackageJson = {
   "dependencies": {
-    "@babel/generator": "^7.28.3",
+    "next": "^14.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "@babel/parser": "^7.28.4",
-    "@babel/traverse": "^7.28.4",
     "@babel/types": "^7.28.4",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -30,28 +22,25 @@
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "lucide-react": "^0.525.0",
-    "next": "15.4.2",
-    "prettier": "^3.6.2",
-    "react": "19.1.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.1",
     "use-debounce": "^10.0.6",
     "uuid": "^11.1.0",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.2.0",
+    "@types/node": "^20.0.0",
+    "tailwindcss": "^3.4.3",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/file-saver": "^2.0.7",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.2",
-    "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.5",
-    "typescript": "^5"
+    "tw-animate-css": "^1.3.5"
   }
-}
+};

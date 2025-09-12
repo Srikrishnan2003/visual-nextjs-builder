@@ -26,18 +26,18 @@ export default function Home() {
           </CollapsiblePanel>
 
           {/* Canvas Center */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 bg-gray-100">
             <Canvas />
           </div>
 
           {/* Right Side Panel */}
-          <div className="w-80 border-l p-4 bg-gray-50">
+          <div className="w-96 border-l p-4 bg-white">
             <PropertiesPanel />
           </div>
 
           {/* File Explorer + Code Editor */}
-          <div className="w-[50%] border-l flex">
-            <CollapsiblePanel side="left" width="w-60" className="border-r bg-white overflow-y-auto">
+          <div className="w-[40%] border-l flex">
+            <CollapsiblePanel side="left" width="w-60" className="border-r bg-gray-50 overflow-y-auto">
               <FileExplorer />
             </CollapsiblePanel>
 

@@ -37,7 +37,7 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
     };
 
     const handleApply = () => {
-        let finalClasses = new Set<string>();
+        const finalClasses = new Set<string>();
 
         for(const [groupKey, cls] of Object.entries(selected)) {
             finalClasses.add(cls);

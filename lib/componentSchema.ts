@@ -20,4 +20,9 @@ export const propSchemas: Record<string, PropField[]> = {
     { key: "gap", label: "Gap", type: "select", options: ["0", "2", "4", "6", "8"] },
     { key: "className", label: "CSS Class", type: "className" },
   ],
+  P: [
+    { key: "children", label: "Text", type: "string" },
+    { key: "className", label: "CSS Class", type: "className" },
+    { key: "fontSize", label: "Font Size", type: "select", options: ["12px", "14px", "16px", "20px", "24px"] },
+  ],
 };

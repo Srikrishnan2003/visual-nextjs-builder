@@ -24,7 +24,7 @@ export default function Canvas() {
 
   return (
     <div
-      className="relative flex-1 h-full bg-white p-4 border overflow-auto"
+      className="relative flex-1 h-full p-4 border rounded-lg shadow-inner overflow-auto"
       onDrop={handleDrop}
       onDragOver={allowDrop}
     >
