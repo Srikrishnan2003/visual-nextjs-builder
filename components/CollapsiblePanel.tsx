@@ -23,14 +23,14 @@ export default function CollapsiblePanel({
         <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-                "bg-blue-500 hover:bg-blue-600 p-2 text-white rounded-full shadow-md",
+                "bg-blue-600 hover:bg-blue-700 p-1.5 text-white rounded-full shadow-lg border border-blue-700",
                 side === "left" ? "rounded-r" : "rounded-l"
             )}
         >
             {side === "left" ? (
-                collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />
+                collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
             ) : (
-                collapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />
+                collapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />
             )}
         </button>
     );

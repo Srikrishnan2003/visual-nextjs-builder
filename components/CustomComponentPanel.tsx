@@ -28,14 +28,14 @@ export function CustomComponentPanel() {
   const customComponents = collectComponents(root);
 
   return (
-    <div className="mt-4 px-2">
-      <h4 className="text-sm text-gray-700 font-bold mb-2">Custom Components</h4>
-      <div className="space-y-1">
+    <div className="mt-4 px-4">
+      <h4 className="text-sm text-gray-800 font-bold mb-3">Custom Components</h4>
+      <div className="space-y-2">
         {customComponents.map((comp) => (
           <button
             key={comp.id}
             onClick={() => setSelectedComponent(comp.name.replace(".tsx", ""))}
-            className={cn("w-full text-left rounded-md px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 shadow-sm")}
+            className={cn("w-full text-left rounded-lg px-4 py-2.5 text-sm bg-gray-50 hover:bg-gray-100 text-gray-700 shadow-md")}
           >
             {comp.name.replace(".tsx", "")}
           </button>

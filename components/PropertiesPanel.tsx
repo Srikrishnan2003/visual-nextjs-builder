@@ -28,8 +28,8 @@ export function PropertiesPanel() {
 
   if (!selectedComponent) {
     return (
-      <div className="p-4 border-l border-gray-200 h-full bg-gray-50 rounded-lg shadow-md">
-        <p className="text-gray-500">No component selected</p>
+      <div className="p-6 border-l border-gray-300 h-full bg-gray-100 rounded-xl shadow-lg">
+        <p className="text-gray-600">No component selected</p>
       </div>
     );
   }
@@ -37,8 +37,8 @@ export function PropertiesPanel() {
   const schema = propSchemas[selectedComponent.type] || [];
 
   return (
-    <div className="p-4 border-l border-gray-200 h-full space-y-4 bg-white rounded-lg shadow-md">
-      <h2 className="font-bold text-lg text-gray-800">Properties</h2>
+    <div className="p-6 border-l border-gray-300 h-full space-y-4 bg-white rounded-xl shadow-lg">
+      <h2 className="font-bold text-xl text-gray-800 mb-4">Properties</h2>
 
       {schema.map((field) => {
         const value = selectedComponent.props[field.key] || "";
@@ -46,21 +46,22 @@ export function PropertiesPanel() {
         switch (field.type) {
           case "string":
             return (
-              <div key={field.key} className="space-y-2">
-                <Label htmlFor={field.key}>{field.label}</Label>
+              <div key={field.key} className="space-y-3">
+                <Label htmlFor={field.key} className="font-medium text-gray-700 mb-1">{field.label}</Label>
                 <Input
                   id={field.key}
                   name={field.key}
                   value={value}
                   onChange={(e) => updateProps(selectedComponent.id, { [field.key]: e.target.value })}
+                  className="rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             );
 
           case "boolean":
             return (
-              <div key={field.key} className="flex items-center justify-between">
-                <Label htmlFor={field.key}>{field.label}</Label>
+              <div key={field.key} className="flex items-center justify-between space-y-3">
+                <Label htmlFor={field.key} className="font-medium text-gray-700 mb-1">{field.label}</Label>
                 <Switch
                   id={field.key}
                   checked={!!value}
@@ -71,13 +72,13 @@ export function PropertiesPanel() {
 
           case "select":
             return (
-              <div key={field.key} className="space-y-2">
-                <Label>{field.label}</Label>
+              <div key={field.key} className="space-y-3">
+                <Label className="font-medium text-gray-700 mb-1">{field.label}</Label>
                 <Select
                   value={value}
                   onValueChange={(newVal) => updateProps(selectedComponent.id, { [field.key]: newVal })}
                 >
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                     <SelectValue placeholder={`Select ${field.label}`} />
                   </SelectTrigger>
                   <SelectContent>
@@ -93,8 +94,8 @@ export function PropertiesPanel() {
 
           case "className":
             return (
-              <div key={field.key} className="space-y-2">
-                <Label>{field.label}</Label>
+              <div key={field.key} className="space-y-3">
+                <Label className="font-medium text-gray-700 mb-1">{field.label}</Label>
                 <ClassSelectorPopover
                   selectedClasses={value}
                   onUpdate={(newClassName) => updateProps(selectedComponent.id, { [field.key]: newClassName })}

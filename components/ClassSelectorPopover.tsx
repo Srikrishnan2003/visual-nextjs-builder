@@ -55,19 +55,19 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline">Edit Class</Button>
+                <Button variant="outline" className="shadow-sm">Edit Class</Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-lg shadow-lg">
+            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-lg shadow-xl bg-white">
                 {Object.entries(tailwindClassOptions).map(([groupKey, group]) => (
                     <div key={groupKey}>
-                        <p className="font-semibold mb-1">{group.label}</p>
+                        <p className="font-semibold mb-1 text-gray-700">{group.label}</p>
                         <RadioGroup
                             value={selected[groupKey]}
                             onValueChange={(val) => handleSelect(groupKey, val)}
-                            className="flex flex-col gap-1"
+                            className="flex flex-col gap-2"
                         >
                             {group.options.map((cls) => (
-                                <Label key={cls} className="flex items-center gap-2 text-sm">
+                                <Label key={cls} className="flex items-center gap-2 text-sm hover:bg-gray-50 rounded-md px-2 py-1">
                                     <RadioGroupItem value={cls} />
                                     {cls}
                                 </Label>
@@ -76,8 +76,8 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
                     </div>
                 ))}
 
-                <div className="flex justify-end pt-2 border-t border-gray-200 mt-4">
-                    <Button onClick={handleApply} size="sm">
+                <div className="flex justify-end pt-2 border-t border-gray-300 mt-4">
+                    <Button onClick={handleApply} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white shadow-md">
                         Apply
                     </Button>
                 </div>

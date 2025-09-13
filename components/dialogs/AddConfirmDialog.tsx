@@ -23,12 +23,14 @@ export default function AddConfirmDialog({ componentType, onClose }: Props) {
         <DialogHeader>
           <DialogTitle>Add component</DialogTitle> {/* ✅ Required */}
         </DialogHeader>
-        <p className="text-sm text-gray-700">Do you want to add <strong>{componentType}</strong> to the canvas?</p>
-        <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={onClose}>
+        <p className="text-base text-gray-800">Do you want to add <strong>{componentType}</strong> to the canvas?</p>
+        <DialogFooter className="mt-6">
+          <Button variant="ghost" onClick={onClose} className="rounded-md">
             Cancel
           </Button>
-          <Button onClick={handleAdd}>Add</Button>
+          <Button onClick={handleAdd} className="rounded-md bg-blue-500 hover:bg-blue-600 text-white">
+            Add
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -170,18 +170,18 @@ export const DraggableComponent = ({
         ${className} 
         ${!disabled ? 'cursor-grab' : 'cursor-default'}
         ${isDragging ? 'cursor-grabbing' : ''}
-        ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white' : ''}
+        ${isSelected ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-gray-50' : ''}
         transition-all duration-200 ease-out
-        hover:scale-[1.02] hover:shadow-lg
+        hover:scale-[1.03] hover:shadow-xl
         select-none
       `}
       style={{
         position: 'absolute',
         left: position.x,
         top: position.y,
-        transform: isDragging ? 'scale(1.05) rotate(1deg)' : 'scale(1) rotate(0deg)',
+        transform: isDragging ? 'scale(1.07) rotate(2deg)' : 'scale(1) rotate(0deg)',
         zIndex: isDragging ? 1000 : isSelected ? 100 : 1,
-        boxShadow: isDragging ? '0 15px 30px rgba(0, 0, 0, 0.15)' : undefined,
+        boxShadow: isDragging ? '0 20px 40px rgba(0, 0, 0, 0.2)' : undefined,
       }}
       onClick={onClick}
       {...(!disabled ? dragHandlers : {})}
@@ -189,7 +189,7 @@ export const DraggableComponent = ({
     >
       {children}
       {isSelected && (
-        <div className="absolute -inset-0.5 bg-blue-500 opacity-25 rounded-lg pointer-events-none animate-pulse" />
+        <div className="absolute -inset-1 bg-blue-400 opacity-30 rounded-lg pointer-events-none animate-pulse" />
       )}
     </div>
   );
