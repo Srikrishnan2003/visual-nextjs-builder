@@ -2,7 +2,10 @@ import { ComponentNode } from "@/types/component-nodes";
 import { componentRegistry } from "@/lib/componentRegistry";
 
 // Utility to format custom component name (capitalize first letter)
-function formatComponentName(name: string) {
+function formatComponentName(name: string | undefined | null) {
+  if (!name || typeof name !== 'string') {
+    return 'UnknownComponent'; // Fallback for invalid names
+  }
   return name.charAt(0).toUpperCase() + name.slice(1).replace(".tsx", "");
 }
 

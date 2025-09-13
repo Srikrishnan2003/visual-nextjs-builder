@@ -21,7 +21,7 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
     const [selected, setSelected] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        const classList = selectedClasses.split(" ").filter(Boolean);
+        const classList = (selectedClasses || "").split(" ").filter(Boolean);
         const selectedPerGroup: Record<string, string> = {};
 
         for(const [key, { options }] of Object.entries(tailwindClassOptions)) {

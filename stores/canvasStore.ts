@@ -8,7 +8,10 @@ export type Viewport = "desktop" | "tablet" | "mobile";
 interface CanvasState {
   canvasTree: ComponentNode[];
   selectedId: string | null;
+  selectedComponent: () => ComponentNode | null; // Corrected derived property as a method
   viewport: Viewport;
+  history: ComponentNode[][];
+  historyIndex: number;
   addComponent: (type: string, parentId?: string) => void;
   addComponentToParent: (type: string, parentId: string) => void;
   moveComponent: (id: string, x: number, y: number) => void;
@@ -16,6 +19,20 @@ interface CanvasState {
   updateProps: (id: string, newProps: Record<string, any>) => void;
   setCanvasTree: (tree: ComponentNode[]) => void;
   setViewport: (viewport: Viewport) => void;
+  undo: () => void;
+  redo: () => void;
+}
+
+// Helper function to find a node by its ID in the tree (moved from PropertiesPanel)
+function findNodeById(nodes: ComponentNode[], id: string): ComponentNode | null {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    if (node.children) {
+      const found = findNodeById(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 function insertComponent(
@@ -64,90 +81,138 @@ function updateComponentPosition(
   });
 }
 
-export const useCanvasStore = create<CanvasState>((set, get) => ({
-  canvasTree: [],
-  selectedId: null,
-  viewport: "desktop",
+export const useCanvasStore = create<CanvasState>((set, get) => {
+  // This helper function wraps our state updates to manage the history.
+  const setWithHistory = (newTree: ComponentNode[]) => {
+    const { history, historyIndex } = get();
+    // Cut off the future part of history if we are undoing and then make a new change.
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newTree);
 
-  setViewport: (viewport) => set({ viewport }),
+    set({
+      canvasTree: newTree,
+      history: newHistory,
+      historyIndex: newHistory.length - 1,
+    });
+  };
 
-  addComponent: (type, parentId) => {
-    const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-    const newComponent: ComponentNode = {
-      id: uuid(),
-      type,
-      props: { children: type },
-      x: 50,
-      y: 50,
-    };
+  return {
+    canvasTree: [],
+    selectedId: null,
+    viewport: "desktop",
+    history: [[]], // Start with an initial empty state
+    historyIndex: 0,
 
-    const updatedTree = parentId
-      ? insertComponent(get().canvasTree, parentId, newComponent)
-      : [...get().canvasTree, newComponent];
+    setViewport: (viewport) => set({ viewport }),
 
-    updateFileCanvasTree(selectedFileId!, updatedTree);
+    addComponent: (type, parentId) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const newComponent: ComponentNode = {
+        id: uuid(),
+        type,
+        props: { children: type },
+        x: 50,
+        y: 50,
+      };
 
-    set({ canvasTree: updatedTree });
-  },
+      const updatedTree = parentId
+        ? insertComponent(get().canvasTree, parentId, newComponent)
+        : [...get().canvasTree, newComponent];
 
-  addComponentToParent: (type: string, parentId: string) => {
-    const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-    const newNode: ComponentNode = {
-      id: uuid(),
-      type,
-      props: { children: type },
-      x: 0,
-      y: 0,
-      parentId,
-    };
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+    },
 
-    const updateChildren = (nodes: ComponentNode[]): ComponentNode[] => {
-      return nodes.map((node) => {
-        if (node.id === parentId) {
+    addComponentToParent: (type: string, parentId: string) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const newNode: ComponentNode = {
+        id: uuid(),
+        type,
+        props: { children: type },
+        x: 0,
+        y: 0,
+        parentId,
+      };
+
+      const updateChildren = (nodes: ComponentNode[]): ComponentNode[] => {
+        return nodes.map((node) => {
+          if (node.id === parentId) {
+            return {
+              ...node,
+              children: [...(node.children || []), newNode],
+            };
+          }
           return {
-            ...node,
-            children: [...(node.children || []), newNode],
+            ...node, 
+            children: node.children ? updateChildren(node.children) : [],
           };
-        }
-        return {
-          ...node, 
-          children: node.children ? updateChildren(node.children) : [],
-        };
+        });
+      };
+
+      const updatedTree = updateChildren(get().canvasTree);
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+    },
+          
+    moveComponent: (id: string, x: number, y: number) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const updatedTree = updateComponentPosition(get().canvasTree, id, x, y);
+
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+    },
+          
+    selectComponent: (id) => set(() => ({ selectedId: id })),
+
+    updateProps: (id, newProps) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const updatedTree = get().canvasTree.map((node) =>
+        node.id === id ? { ...node, props: { ...node.props, ...newProps } } : node
+      );
+
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+    },
+        
+    setCanvasTree: (tree) => {
+      const { selectedFileId, updateFileCanvasTree } = useFileSystemStore.getState();
+      if (selectedFileId) {
+        updateFileCanvasTree(selectedFileId, tree);
+      }
+      // When loading a tree, reset the history.
+      set({
+        canvasTree: tree,
+        history: [tree],
+        historyIndex: 0,
       });
-    };
+    },
 
-    const updatedTree = updateChildren(get().canvasTree);
-    updateFileCanvasTree(selectedFileId!, updatedTree);
-    set({ canvasTree: updatedTree });
-  },
-        
-  moveComponent: (id: string, x: number, y: number) => {
-    const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-    const updatedTree = updateComponentPosition(get().canvasTree, id, x, y); // Use the recursive helper
+    undo: () => {
+      const { history, historyIndex } = get();
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        set({
+          canvasTree: history[newIndex],
+          historyIndex: newIndex,
+        });
+      }
+    },
 
-    updateFileCanvasTree(selectedFileId!, updatedTree);
-    set({ canvasTree: updatedTree });
-  },
-        
+    redo: () => {
+      const { history, historyIndex } = get();
+      if (historyIndex < history.length - 1) {
+        const newIndex = historyIndex + 1;
+        set({
+          canvasTree: history[newIndex],
+          historyIndex: newIndex,
+        });
+      }
+    },
 
-  selectComponent: (id) => set(() => ({ selectedId: id })),
-
-  updateProps: (id, newProps) => {
-    const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-    const updatedTree = get().canvasTree.map((node) =>
-      node.id === id ? { ...node, props: { ...node.props, ...newProps } } : node
-    );
-
-    updateFileCanvasTree(selectedFileId!, updatedTree);
-    set({ canvasTree: updatedTree });
-  },
-      
-  setCanvasTree: (tree) => {
-    const { selectedFileId, updateFileCanvasTree } = useFileSystemStore.getState();
-    if (selectedFileId) {
-      updateFileCanvasTree(selectedFileId, tree);
-    }
-
-    set({ canvasTree: tree });
-  },
-}));
+    // Correct implementation of selectedComponent as a method
+    selectedComponent: () => {
+      const { canvasTree, selectedId } = get();
+      return selectedId ? findNodeById(canvasTree, selectedId) : null;
+    },
+  };
+});
