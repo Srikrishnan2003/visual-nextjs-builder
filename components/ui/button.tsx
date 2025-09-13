@@ -1,8 +1,10 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
+import Link from "next/link";
+import DynamicLucideIcon from "@/components/DynamicLucideIcon";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -35,25 +37,73 @@ const buttonVariants = cva(
   }
 )
 
+interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+  iconLeft?: Parameters<typeof DynamicLucideIcon>[0]['name'];
+  iconRight?: Parameters<typeof DynamicLucideIcon>[0]['name'];
+  href?: string;
+  target?: "_self" | "_blank";
+  type?: "button" | "submit" | "reset";
+}
+
 function Button({
   className,
   variant,
   size,
   asChild = false,
+  children,
+  isLoading = false,
+  loadingText,
+  iconLeft,
+  iconRight,
+  href,
+  target,
+  type = "button",
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot : "button"
+}: ButtonProps) {
+  const Comp = asChild ? Slot : "button";
+
+  const content = (
+    <>
+      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      {iconLeft && iconLeft !== "none" && !isLoading && (
+        <DynamicLucideIcon name={iconLeft} className="mr-2 h-4 w-4" />
+      )}
+      {isLoading ? loadingText || children : children}
+      {iconRight && iconRight !== "none" && !isLoading && (
+        <DynamicLucideIcon name={iconRight} className="ml-2 h-4 w-4" />
+      )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        target={target}
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        {content}
+      </Link>
+    );
+  }
 
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isLoading || props.disabled}
+      type={type}
       {...props}
-    />
-  )
+    >
+      {content}
+    </Comp>
+  );
 }
+
+
 
 export { Button, buttonVariants }

@@ -29,13 +29,13 @@ export function CustomComponentPanel() {
 
   return (
     <div className="mt-4 px-4">
-      <h4 className="text-sm text-gray-800 font-bold mb-3">Custom Components</h4>
-      <div className="space-y-2">
+      <h4 className="text-md text-slate-800 font-bold mb-3 border-b pb-2 border-slate-200">Custom Components</h4>
+      <div className="space-y-2 pt-2">
         {customComponents.map((comp) => (
           <button
             key={comp.id}
             onClick={() => setSelectedComponent(comp.name.replace(".tsx", ""))}
-            className={cn("w-full text-left rounded-lg px-4 py-2.5 text-sm bg-gray-50 hover:bg-gray-100 text-gray-700 shadow-md")}
+            className={cn("w-full text-left rounded-lg px-3 py-2 text-sm bg-white hover:bg-blue-50 text-slate-700 shadow-sm border border-slate-100 transition-all duration-200 transform hover:scale-[1.02]")}
           >
             {comp.name.replace(".tsx", "")}
           </button>

@@ -33,8 +33,8 @@ export default function CodeEditor() {
     }, [debouncedCode, setCanvasTree]);
 
     return (
-        <div className="h-full w-full border-l border-gray-700 flex flex-col rounded-xl shadow-xl bg-gray-800">
-            <div className="px-4 py-2 border-b border-gray-800 bg-gray-950">
+        <div className="h-full w-full border border-gray-800 flex flex-col rounded-xl shadow-xl bg-gray-950">
+            <div className="px-4 py-2 border-b border-gray-900 bg-gray-900">
                 {/* Toolbar content goes here if needed */}
             </div>
             <div className="flex-1">
@@ -45,7 +45,7 @@ export default function CodeEditor() {
                     theme="vs-dark"
                     onChange={handleCodeChange}
                                         options={{
-                        fontSize: 14,
+                        fontSize: 12,
                         minimap: { enabled: false },
                         readOnly: true
                     }}

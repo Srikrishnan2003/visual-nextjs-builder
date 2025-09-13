@@ -2,7 +2,9 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 // Custom hook for smooth dragging
 export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
-  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false); 
+  const [_, forceRender] = useState(0); 
+
   const [dragState, setDragState] = useState({
     startX: 0,
     startY: 0,
@@ -25,7 +27,8 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
     };
     
     setDragState(startState);
-    setIsDragging(true);
+    isDraggingRef.current = true; 
+    forceRender(prev => prev + 1); 
     
     if (onDragStart) {
       onDragStart(e, elementRef.current);
@@ -36,7 +39,7 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
   }, [onDragStart]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging || !elementRef.current) return;
+    if (!isDraggingRef.current || !elementRef.current) return; 
     
     e.preventDefault();
     
@@ -52,12 +55,13 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
     if (onDrag) {
       onDrag(e, { x: newLeft, y: newTop }, elementRef.current);
     }
-  }, [isDragging, dragState, onDrag]);
+  }, [dragState, onDrag]); 
 
   const handleMouseUp = useCallback((e) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current || !elementRef.current) return; 
     
-    setIsDragging(false);
+    isDraggingRef.current = false; 
+    forceRender(prev => prev + 1); 
     
     document.body.style.userSelect = '';
     document.body.style.cursor = '';
@@ -65,7 +69,7 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
     if (onDragEnd) {
       onDragEnd(e, elementRef.current);
     }
-  }, [isDragging, onDragEnd]);
+  }, [onDragEnd]); 
 
   const handleTouchStart = useCallback((e) => {
     if (!elementRef.current) return;
@@ -82,7 +86,7 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
   }, [handleMouseDown]);
 
   const handleTouchMove = useCallback((e) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     
     const touch = e.touches[0];
     const mockEvent = {
@@ -93,14 +97,14 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
     };
     
     handleMouseMove(mockEvent);
-  }, [isDragging, handleMouseMove]);
+  }, [handleMouseMove]);
 
   const handleTouchEnd = useCallback((e) => {
     handleMouseUp(e);
   }, [handleMouseUp]);
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDraggingRef.current) { 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -113,11 +117,11 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
         document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+  }, [isDraggingRef.current, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]); 
 
   return {
     elementRef,
-    isDragging,
+    isDragging: isDraggingRef.current, 
     dragHandlers: {
       onMouseDown: handleMouseDown,
       onTouchStart: handleTouchStart,
@@ -126,7 +130,7 @@ export const useSmoothDrag = (onDrag, onDragStart, onDragEnd) => {
 };
 
 // Draggable component wrapper
-export const DraggableComponent = ({ 
+export const DraggableComponent = ({
   children, 
   className = "", 
   initialPosition = { x: 0, y: 0 },
@@ -136,10 +140,18 @@ export const DraggableComponent = ({
   onClick,
   ...props 
 }) => {
-  const [position, setPosition] = useState(initialPosition);
+  const positionRef = useRef(initialPosition); 
+
+  useEffect(() => {
+    positionRef.current = initialPosition;
+    if (elementRef.current) {
+      elementRef.current.style.left = `${initialPosition.x}px`;
+      elementRef.current.style.top = `${initialPosition.y}px`;
+    }
+  }, [initialPosition]);
 
   const handleDrag = useCallback((e, newPosition) => {
-    setPosition(newPosition);
+    positionRef.current = newPosition; 
     if (onPositionChange) {
       onPositionChange(newPosition);
     }
@@ -159,10 +171,6 @@ export const DraggableComponent = ({
     handleDragEnd
   );
 
-  useEffect(() => {
-    setPosition(initialPosition);
-  }, [initialPosition]);
-
   return (
     <div
       ref={elementRef}
@@ -170,18 +178,22 @@ export const DraggableComponent = ({
         ${className} 
         ${!disabled ? 'cursor-grab' : 'cursor-default'}
         ${isDragging ? 'cursor-grabbing' : ''}
-        ${isSelected ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-gray-50' : ''}
-        transition-all duration-200 ease-out
-        hover:scale-[1.03] hover:shadow-xl
+        ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-50' : 'ring-0'}
+        hover:scale-[1.02]
         select-none
       `}
       style={{
         position: 'absolute',
-        left: position.x,
-        top: position.y,
-        transform: isDragging ? 'scale(1.07) rotate(2deg)' : 'scale(1) rotate(0deg)',
+        left: positionRef.current.x, 
+        top: positionRef.current.y,  
+        transform: isDragging ? 'scale(1.05) rotate(1deg)' : 'scale(1) rotate(0deg)',
         zIndex: isDragging ? 1000 : isSelected ? 100 : 1,
-        boxShadow: isDragging ? '0 20px 40px rgba(0, 0, 0, 0.2)' : undefined,
+        boxShadow: isDragging 
+          ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' 
+          : isSelected 
+          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          : undefined,
+        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
       }}
       onClick={onClick}
       {...(!disabled ? dragHandlers : {})}
@@ -189,7 +201,7 @@ export const DraggableComponent = ({
     >
       {children}
       {isSelected && (
-        <div className="absolute -inset-1 bg-blue-400 opacity-30 rounded-lg pointer-events-none animate-pulse" />
+        <div className="absolute -inset-1 bg-blue-400/30 rounded-lg pointer-events-none animate-pulse" />
       )}
     </div>
   );

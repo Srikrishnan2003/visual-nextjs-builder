@@ -2,6 +2,13 @@ import { Button } from "@/components/ui/button";
 import Div from "@/components/ui/div";
 import FlexBox from "@/components/ui/flexbox";
 import { P } from "@/components/ui/p";
+import { Card } from "@/components/ui/card";
+import { Accordion } from "@/components/ui/accordion";
+import { Tabs } from "@/components/ui/tabs";
+import { Alert } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ComponentType } from "react";
 
 export const componentRegistry: Record<string, ComponentType<object>> = {
@@ -9,4 +16,11 @@ export const componentRegistry: Record<string, ComponentType<object>> = {
     Div,
     FlexBox,
     P,
+    Card,
+    Accordion,
+    Tabs,
+    Alert,
+    Input,
+    Textarea,
+    Checkbox,
 };

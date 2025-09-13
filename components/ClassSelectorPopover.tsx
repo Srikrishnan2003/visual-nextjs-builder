@@ -55,19 +55,19 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" className="shadow-sm">Edit Class</Button>
+                <Button variant="outline" className="shadow-sm rounded-md border-slate-200 text-slate-700 hover:bg-slate-100">Edit Class</Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-lg shadow-xl bg-white">
+            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-xl shadow-2xl bg-white/90 backdrop-blur-sm p-5 border border-slate-100">
                 {Object.entries(tailwindClassOptions).map(([groupKey, group]) => (
                     <div key={groupKey}>
-                        <p className="font-semibold mb-1 text-gray-700">{group.label}</p>
+                        <p className="font-semibold mb-2 text-slate-700 whitespace-normal break-words text-md">{group.label}</p>
                         <RadioGroup
                             value={selected[groupKey]}
                             onValueChange={(val) => handleSelect(groupKey, val)}
-                            className="flex flex-col gap-2"
+                            className="flex flex-col gap-1"
                         >
                             {group.options.map((cls) => (
-                                <Label key={cls} className="flex items-center gap-2 text-sm hover:bg-gray-50 rounded-md px-2 py-1">
+                                <Label key={cls} className="flex items-center gap-2 text-sm hover:bg-slate-50 rounded-md px-2 py-1 whitespace-normal break-words cursor-pointer">
                                     <RadioGroupItem value={cls} />
                                     {cls}
                                 </Label>
@@ -76,8 +76,8 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
                     </div>
                 ))}
 
-                <div className="flex justify-end pt-2 border-t border-gray-300 mt-4">
-                    <Button onClick={handleApply} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white shadow-md">
+                <div className="flex justify-end pt-3 border-t border-slate-100 mt-4">
+                    <Button onClick={handleApply} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-lg px-4 py-2">
                         Apply
                     </Button>
                 </div>

@@ -22,7 +22,7 @@ export function FileExplorer() {
     } = useFileSystemStore();
 
     return (
-        <div className="text-xs px-4 pt-4 text-gray-800">
+        <div className="text-sm px-3 pt-3 text-slate-800">
             <FileNodeItem node={root} />
         </div>
     );
@@ -43,11 +43,11 @@ export function FileExplorer() {
         const canvasStore = useCanvasStore();
 
         return (
-            <div className="ml-2">
+            <div className="ml-2 min-w-0">
                 <div
                     className={cn(
-                        "flex items-center justify-between gap-1 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer",
-                        isSelected && "bg-blue-50 text-blue-700 font-semibold"
+                        "flex items-center justify-between gap-1 rounded-lg px-2 py-1.5 hover:bg-slate-100 cursor-pointer transition-colors duration-150",
+                        isSelected && "bg-blue-100 text-blue-800 font-semibold"
                     )}
                     onClick={(e) => {
                         if (renaming) {
@@ -66,9 +66,9 @@ export function FileExplorer() {
                 >
                     <div className="flex items-center gap-1" onClick={() => isFolder && setExpanded((prev) => !prev)}>
                         {isFolder ? (
-                            expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                            expanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />
                         ) : (
-                            <FileText className="w-4 h-4" />
+                            <FileText className="w-4 h-4 text-slate-500" />
                         )}
                         {renaming ? (
                             <Input
@@ -81,28 +81,28 @@ export function FileExplorer() {
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") handleRename();
                                 }}
-                                className="h-6 text-xs px-2 py-1 border border-gray-200 rounded-md"
+                                className="h-7 text-sm px-2 py-1 border border-slate-200 rounded-md"
                             />
                         ) : (
-                            <span className="truncate text-base">{node.name}</span>
+                            <span className="truncate text-sm min-w-0">{node.name}</span>
                         )}
                     </div>
 
                     {node.id !== "root" && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="w-6 h-6">
+                                <Button variant="ghost" size="icon" className="w-7 h-7 text-slate-500 hover:bg-slate-200/50">
                                     <MoreVertical className="w-3 h-3" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent side="right">
+                            <DropdownMenuContent side="right" className="bg-white/90 backdrop-blur-sm border border-slate-100 rounded-lg shadow-lg p-1">
                                 {isFolder && (
                                     <>
-                                        <DropdownMenuItem onClick={() => addFile(node.id, "newFile.tsx")} className="px-3 py-2 text-sm">
-                                            <File /> New File
+                                        <DropdownMenuItem onClick={() => addFile(node.id, "newFile.tsx")} className="px-3 py-2 text-sm hover:bg-slate-50 rounded-md whitespace-normal break-words text-slate-700">
+                                            <File className="mr-2 h-4 w-4" /> New File
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => addFolder(node.id, "newFolder")} className="px-3 py-2 text-sm">
-                                            <Folder /> New Folder
+                                        <DropdownMenuItem onClick={() => addFolder(node.id, "newFolder")} className="px-3 py-2 text-sm hover:bg-slate-50 rounded-md whitespace-normal break-words text-slate-700">
+                                            <Folder className="mr-2 h-4 w-4" /> New Folder
                                         </DropdownMenuItem>
                                     </>
                                 )}
@@ -110,21 +110,21 @@ export function FileExplorer() {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setRenaming(true);
-                                    }} className="px-3 py-2 text-sm">
-                                   <Pencil /> Rename
+                                    }} className="px-3 py-2 text-sm hover:bg-slate-50 rounded-md whitespace-normal break-words text-slate-700">
+                                   <Pencil className="mr-2 h-4 w-4" /> Rename
                                 </DropdownMenuItem>
                                 {!isFolder && 
                                     <DropdownMenuItem
                                         onClick={() => markAsCustomComponent(node.id, !node.isCustomComponent)}
-                                        className="px-3 py-2 text-sm"
+                                        className="px-3 py-2 text-sm hover:bg-slate-50 rounded-md whitespace-normal break-words text-slate-700"
                                     >
-                                        <File />
+                                        <File className="mr-2 h-4 w-4" />
                                         {node.isCustomComponent ? "Unmark as Component" : "Mark as Component"}
                                     </DropdownMenuItem>
                                 }
                                 
-                                <DropdownMenuItem onClick={() => deleteNode(node.id)} className="px-3 py-2 text-sm">
-                                    <Trash /> Delete
+                                <DropdownMenuItem onClick={() => deleteNode(node.id)} className="px-3 py-2 text-sm hover:bg-red-50 rounded-md whitespace-normal break-words text-red-600">
+                                    <Trash className="mr-2 h-4 w-4" /> Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -132,7 +132,7 @@ export function FileExplorer() {
                 </div>
 
                 {expanded && isFolder && (
-                    <div className="ml-2 border-l border-gray-300 pl-3 space-y-2">
+                    <div className="ml-2 border-l border-slate-200 pl-3 space-y-2">
                         {node.children?.map((child) => (
                             <FileNodeItem key={child.id} node={child} />
                         ))}

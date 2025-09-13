@@ -94,7 +94,7 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
   // ❌ Fallback: unknown component
   return (
     <div
-      className="bg-red-100 text-red-700 p-2 text-xs rounded"
+      className="bg-red-100 text-red-700 p-2 text-xs rounded-sm border border-red-100 shadow-xs break-words"
     >
       Unknown: {node.type}
     </div>

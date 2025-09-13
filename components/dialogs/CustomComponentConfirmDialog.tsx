@@ -62,17 +62,17 @@ export default function CustomComponentConfirmDialog({ componentType, onClose }:
 
     return (
         <Dialog open={open} onOpenChange={() => { setOpen(false); onClose(); }}>
-            <DialogTitle>Custom Component</DialogTitle>
-            <DialogContent className="space-y-6">
-                <h2 className="font-bold text-base text-gray-900">
-                    Add &quot;{componentType}&quot; to which page?
+            <DialogContent className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-100 p-6 space-y-6">
+                <DialogTitle className="text-2xl font-bold text-slate-800">Custom Component</DialogTitle>
+                <h2 className="font-bold text-lg text-slate-800">
+                    Add &quot;<span className="text-blue-600">{componentType}</span>&quot; to which page?
                 </h2>
                 <div className="space-y-3">
                     {pageFiles.map((file) => (
                         <button
                             key={file.id}
                             onClick={() => handleInsert(file.id)}
-                            className="w-full px-4 py-2.5 text-left bg-gray-50 hover:bg-gray-100 rounded-lg shadow-md text-gray-800"
+                            className="w-full px-4 py-3 text-left bg-white hover:bg-blue-50 rounded-lg shadow-sm border border-slate-100 text-slate-700 transition-all duration-200 transform hover:scale-[1.02]"
                         >   
                             {file.name}
                         </button>

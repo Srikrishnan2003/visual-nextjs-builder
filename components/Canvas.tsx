@@ -9,17 +9,14 @@ export default function Canvas() {
 
   return (
     <div
-      className="relative flex-1 h-full p-4 rounded-2xl shadow-2xl overflow-auto bg-gradient-to-br from-gray-100 to-gray-50"
+      className="relative flex-1 h-full p-4 rounded-2xl shadow-xl overflow-auto bg-slate-50"
     >
-      {/* Grid Pattern */}
+      {/* Dot Pattern */}
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: '20px 20px'
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0)',
+          backgroundSize: '15px 15px',
         }}
       />
       {canvasTree.map((node) => (

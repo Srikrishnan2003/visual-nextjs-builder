@@ -40,6 +40,26 @@ function insertComponent(
   })
 }
 
+function updateComponentPosition(
+  nodes: ComponentNode[],
+  idToUpdate: string,
+  newX: number,
+  newY: number
+): ComponentNode[] {
+  return nodes.map((node) => {
+    if (node.id === idToUpdate) {
+      return { ...node, x: newX, y: newY };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: updateComponentPosition(node.children, idToUpdate, newX, newY),
+      };
+    }
+    return node;
+  });
+}
+
 export const useCanvasStore = create<CanvasState>((set, get) => ({
   canvasTree: [],
   selectedId: null,
@@ -96,9 +116,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         
   moveComponent: (id: string, x: number, y: number) => {
     const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-    const updatedTree = get().canvasTree.map((node) => 
-      node.id === id ? { ...node, x, y } : node
-    );
+    const updatedTree = updateComponentPosition(get().canvasTree, id, x, y); // Use the recursive helper
 
     updateFileCanvasTree(selectedFileId!, updatedTree);
     set({ canvasTree: updatedTree });
