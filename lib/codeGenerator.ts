@@ -66,9 +66,14 @@ export function generateCodeFromTree(tree: ComponentNode[]): string {
     .map((node) => generateCode(node, 0, usedCustomComponents))
     .join("\n");
 
+  // Wrap multiple root-level components in a React Fragment
+  const wrappedJsx = tree.length > 1 ? `<>
+${jsx}
+</>` : jsx;
+
   const imports = Array.from(usedCustomComponents)
     .map((name) => `import ${name} from "./components/${name}";`)
     .join("\n");
 
-  return `${imports ? imports + "\n\n" : ""}${jsx}`;
+  return `${imports ? imports + "\n\n" : ""}${wrappedJsx}`;
 }

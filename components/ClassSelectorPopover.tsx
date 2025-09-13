@@ -57,7 +57,7 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
             <PopoverTrigger asChild>
                 <Button variant="outline">Edit Class</Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-6">
+            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-lg shadow-lg">
                 {Object.entries(tailwindClassOptions).map(([groupKey, group]) => (
                     <div key={groupKey}>
                         <p className="font-semibold mb-1">{group.label}</p>
@@ -76,7 +76,7 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
                     </div>
                 ))}
 
-                <div className="flex justify-end pt-2 border-t mt-4">
+                <div className="flex justify-end pt-2 border-t border-gray-200 mt-4">
                     <Button onClick={handleApply} size="sm">
                         Apply
                     </Button>

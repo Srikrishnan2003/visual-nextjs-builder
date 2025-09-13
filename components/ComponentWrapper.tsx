@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import { DraggableComponent } from "./Draggable";
 import { componentRegistry } from "@/lib/componentRegistry";
 import { ComponentNode } from "@/types/component-nodes";
 import { useCanvasStore } from "@/stores/canvasStore";
@@ -8,7 +10,7 @@ interface ComponentWrapperProps {
 }
 
 export function ComponentWrapper({ node }: ComponentWrapperProps) {
-  const { selectComponent, selectedId, addComponentToParent } = useCanvasStore();
+  const { selectComponent, selectedId, addComponentToParent, moveComponent } = useCanvasStore();
   const { root } = useFileSystemStore();
 
   const Comp = componentRegistry[node.type];
@@ -27,22 +29,13 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData("componentId", node.id);
-  };
-
   const isChild = !!node.parentId;
 
-  const style: React.CSSProperties = {
-    top: !isChild ? node.y ?? 0 : undefined,
-    left: !isChild ? node.x ?? 0 : undefined,
-    position: !isChild ? "absolute" : "relative",
-    padding: 4,
-    border: isSelected ? "2px solid #3b82f6" : "1px solid #ccc",
-    cursor: !isChild ? "move" : "default",
-  };
+  const handlePositionChange = useCallback((newPosition: { x: number; y: number }) => {
+    moveComponent(node.id, newPosition.x, newPosition.y);
+  }, [node.id, moveComponent]);
 
-  // 🔍 Helper: Find canvasTree for a custom component
+  // ✂️ Helper: Find canvasTree for a custom component
   const findCustomComponentTree = (name: string): ComponentNode[] | null => {
     const search = (node: typeof root): ComponentNode[] | null => {
       if (
@@ -68,12 +61,14 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
   // ✅ Case 1: Built-in Component → absolute + draggable
   if (Comp) {
     return (
-      <div
-        draggable={!isChild}
+      <DraggableComponent
+        initialPosition={{ x: node.x ?? 0, y: node.y ?? 0 }}
+        onPositionChange={handlePositionChange}
         onClick={handleClick}
-        onDragStart={handleDragStart}
+        isSelected={isSelected}
+        disabled={isChild}
         onContextMenu={handleContextMenu}
-        style={style}
+        className="" // Remove padding, DraggableComponent handles styling
       >
         <Comp {...node.props}>
           {node.props.children}
@@ -81,7 +76,7 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
             <ComponentWrapper key={child.id} node={child} />
           ))}
         </Comp>
-      </div>
+      </DraggableComponent>
     );
   }
 
@@ -99,12 +94,7 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
   // ❌ Fallback: unknown component
   return (
     <div
-      style={{
-        backgroundColor: "#fee2e2",
-        color: "#dc2626",
-        padding: 4,
-        fontSize: 12,
-      }}
+      className="bg-red-100 text-red-700 p-2 text-xs rounded"
     >
       Unknown: {node.type}
     </div>

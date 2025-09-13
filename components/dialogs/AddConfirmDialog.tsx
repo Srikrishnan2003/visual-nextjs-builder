@@ -23,7 +23,7 @@ export default function AddConfirmDialog({ componentType, onClose }: Props) {
         <DialogHeader>
           <DialogTitle>Add component</DialogTitle> {/* ✅ Required */}
         </DialogHeader>
-        <p className="text-sm">Do you want to add <strong>{componentType}</strong> to the canvas?</p>
+        <p className="text-sm text-gray-700">Do you want to add <strong>{componentType}</strong> to the canvas?</p>
         <DialogFooter className="mt-4">
           <Button variant="ghost" onClick={onClose}>
             Cancel

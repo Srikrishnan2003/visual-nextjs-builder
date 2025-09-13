@@ -64,7 +64,7 @@ export default function CustomComponentConfirmDialog({ componentType, onClose }:
         <Dialog open={open} onOpenChange={() => { setOpen(false); onClose(); }}>
             <DialogTitle>Custom Component</DialogTitle>
             <DialogContent className="space-y-4">
-                <h2 className="font-bold text-sm">
+                <h2 className="font-bold text-sm text-gray-800">
                     Add &quot;{componentType}&quot; to which page?
                 </h2>
                 <div className="space-y-2">
@@ -72,7 +72,7 @@ export default function CustomComponentConfirmDialog({ componentType, onClose }:
                         <button
                             key={file.id}
                             onClick={() => handleInsert(file.id)}
-                            className="w-fill px-3 py-2 text-left bg-gray-100 hover:bg-gray-200 rounded"
+                            className="w-full px-3 py-2 text-left bg-gray-100 hover:bg-gray-200 rounded-md shadow-sm text-gray-700"
                         >   
                             {file.name}
                         </button>

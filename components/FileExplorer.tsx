@@ -22,7 +22,7 @@ export function FileExplorer() {
     } = useFileSystemStore();
 
     return (
-        <div className="text-sm px-2 pt-2">
+        <div className="text-xs px-2 pt-2 text-gray-700">
             <FileNodeItem node={root} />
         </div>
     );
@@ -46,8 +46,8 @@ export function FileExplorer() {
             <div className="ml-2">
                 <div
                     className={cn(
-                        "flex items-center justify-between gap-1 rounded px-1 py-0.5 hover:bg-muted cursor-pointer",
-                        isSelected && "bg-muted"
+                        "flex items-center justify-between gap-1 rounded-md px-2 py-1 hover:bg-gray-100 cursor-pointer",
+                        isSelected && "bg-blue-100 text-blue-800"
                     )}
                     onClick={(e) => {
                         if (renaming) {
@@ -66,9 +66,9 @@ export function FileExplorer() {
                 >
                     <div className="flex items-center gap-1" onClick={() => isFolder && setExpanded((prev) => !prev)}>
                         {isFolder ? (
-                            expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                            expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />
                         ) : (
-                            <FileText className="w-4 h-4" />
+                            <FileText className="w-3 h-3" />
                         )}
                         {renaming ? (
                             <Input
@@ -81,17 +81,17 @@ export function FileExplorer() {
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") handleRename();
                                 }}
-                                className="h-6 text-xs px-1 py-0"
+                                className="h-5 text-xs px-1.5 py-0.5 border border-gray-300"
                             />
                         ) : (
-                            <span className="truncate text-xs">{node.name}</span>
+                            <span className="truncate text-sm">{node.name}</span>
                         )}
                     </div>
 
                     {node.id !== "root" && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="w-4 h-4">
+                                <Button variant="ghost" size="icon" className="w-5 h-5">
                                     <MoreVertical className="w-3 h-3" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -131,7 +131,7 @@ export function FileExplorer() {
                 </div>
 
                 {expanded && isFolder && (
-                    <div className="ml-3 border-l pl-1 space-y-1">
+                    <div className="ml-2 border-l border-gray-200 pl-2 space-y-1">
                         {node.children?.map((child) => (
                             <FileNodeItem key={child.id} node={child} />
                         ))}

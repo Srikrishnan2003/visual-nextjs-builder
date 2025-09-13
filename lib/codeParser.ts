@@ -87,7 +87,8 @@ export function parseCodeToTree(code: string): ComponentNode[] {
                     if (specifier.type === 'ImportSpecifier') {
                         importedComponents[specifier.local.name] = specifier.imported.name;
                     } else if (specifier.type === 'ImportDefaultSpecifier') {
-                        importedComponents[specifier.local.name] = 'default';
+                        // For default imports, the local name is the component name
+                        importedComponents[specifier.local.name] = specifier.local.name;
                     }
                 });
             }
