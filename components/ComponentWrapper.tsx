@@ -21,15 +21,22 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
     e.stopPropagation();
     if (nestingMode) {
       if (node.id === nestingTargetId) {
-        // Clicking on the target div itself, do nothing or show a message
         console.log("Cannot nest a component into itself or its target div.");
         return;
       }
-      // Perform nesting if in nesting mode and not clicking the target div
       performNesting(node.id);
     } else {
       // Normal selection mode
-      selectComponent(node.id);
+      let idToSelect = node.id;
+      if (node.type === "AccordionItem") {
+        const accordionTriggerChild = node.children?.find(
+          (child) => child.type === "AccordionTrigger"
+        );
+        if (accordionTriggerChild) {
+          idToSelect = accordionTriggerChild.id;
+        }
+      }
+      selectComponent(idToSelect);
     }
   };
 
@@ -86,12 +93,24 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
     };
 
     const content = (
-      <Comp {...node.props}>
-        {node.props.children}
-        {node.children?.map((child) => (
-          <ComponentWrapper key={child.id} node={child} />
-        ))}
-      </Comp>
+      node.type === "Accordion" ? (
+        <Comp
+          {...node.props}
+          collapsible={!!node.props.collapsible}
+        >
+          {node.props.children}
+          {node.children?.map((child) => (
+            <ComponentWrapper key={child.id} node={child} />
+          ))}
+        </Comp>
+      ) : (
+        <Comp {...node.props}>
+          {node.props.children}
+          {node.children?.map((child) => (
+            <ComponentWrapper key={child.id} node={child} />
+          ))}
+        </Comp>
+      )
     );
 
     if (isChild) {

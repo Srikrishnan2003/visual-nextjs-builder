@@ -26,6 +26,7 @@ interface CanvasState {
   startNesting: (targetDivId: string) => void; // New: Initiates nesting mode
   cancelNesting: () => void; // New: Cancels nesting mode
   performNesting: (componentToNestId: string) => void; // New: Performs the actual nesting
+  addAccordionItem: (accordionId: string) => void; // New: Adds an AccordionItem to an Accordion
 }
 
 // Helper function to find a node by its ID in the tree (moved from PropertiesPanel)
@@ -118,7 +119,13 @@ function updateNodePropsById(
 ): ComponentNode[] {
   return nodes.map((node) => {
     if (node.id === idToUpdate) {
-      return { ...node, props: { ...node.props, ...newProps } };
+      // Check if any of the newProps are actually different from the current props
+      const hasChanged = Object.keys(newProps).some(key => node.props[key] !== newProps[key]);
+
+      if (hasChanged) {
+        return { ...node, props: { ...node.props, ...newProps } };
+      }
+      return node; // Return the original node if no props have changed
     }
     if (node.children) {
       return {
@@ -190,13 +197,69 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     addComponent: (type, parentId) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-      const newComponent: ComponentNode = {
+      let newComponent: ComponentNode = {
         id: uuid(),
         type,
         props: { children: type },
         x: 50,
         y: 50,
       };
+
+      if (type === "Accordion") {
+        const accordionItemId = uuid();
+        const accordionTriggerId = uuid();
+        const accordionContentId = uuid();
+        const headingTextId = uuid();
+        const contentTextId = uuid();
+
+        newComponent = {
+          ...newComponent,
+          children: [
+            {
+              id: accordionItemId,
+              type: "AccordionItem",
+              props: { value: `item-${uuid().slice(0, 4)}` },
+              x: 0,
+              y: 0,
+              parentId: newComponent.id,
+              children: [
+                {
+                  id: accordionTriggerId,
+                  type: "AccordionTrigger",
+                  props: {},
+                  x: 0, y: 0,
+                  parentId: accordionItemId,
+                  children: [
+                    {
+                      id: headingTextId,
+                      type: "P",
+                      props: { children: "Accordion Heading" },
+                      x: 0, y: 0,
+                      parentId: accordionTriggerId,
+                    },
+                  ],
+                },
+                {
+                  id: accordionContentId,
+                  type: "AccordionContent",
+                  props: {},
+                  x: 0, y: 0,
+                  parentId: accordionItemId,
+                  children: [
+                    {
+                      id: contentTextId,
+                      type: "P",
+                      props: { children: "Accordion Content" },
+                      x: 0, y: 0,
+                      parentId: accordionContentId,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+      }
 
       const updatedTree = parentId
         ? insertComponent(get().canvasTree, parentId, newComponent)
@@ -245,7 +308,23 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       setWithHistory(updatedTree);
     },
           
-    selectComponent: (id) => set(() => ({ selectedId: id })),
+    selectComponent: (id) => {
+      const { canvasTree } = get();
+      const selectedNode = findNodeById(canvasTree, id);
+
+      if (selectedNode && selectedNode.type === "AccordionItem") {
+        // If AccordionItem is clicked, select its first AccordionTrigger child
+        const accordionTriggerChild = selectedNode.children?.find(
+          (child) => child.type === "AccordionTrigger"
+        );
+        if (accordionTriggerChild) {
+          set(() => ({ selectedId: accordionTriggerChild.id }));
+          return; // Exit to prevent setting selectedId to AccordionItem
+        }
+      }
+      // For all other components, or if AccordionItem has no Trigger, select the original ID
+      set(() => ({ selectedId: id }));
+    },
 
     updateProps: (id, newProps) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
@@ -288,6 +367,63 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
           historyIndex: newIndex,
         });
       }
+    },
+
+    addAccordionItem: (accordionId) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const newAccordionItemId = uuid();
+      const newAccordionTriggerId = uuid();
+      const newAccordionContentId = uuid();
+      const newHeadingTextId = uuid();
+      const newContentTextId = uuid();
+
+      const newAccordionItem: ComponentNode = {
+        id: newAccordionItemId,
+        type: "AccordionItem",
+        props: { value: `item-${uuid().slice(0, 4)}` },
+        x: 0,
+        y: 0,
+        parentId: accordionId,
+        children: [
+          {
+            id: newAccordionTriggerId,
+            type: "AccordionTrigger",
+            props: {},
+            x: 0, y: 0,
+            parentId: newAccordionItemId,
+            children: [
+              {
+                id: newHeadingTextId,
+                type: "P",
+                props: { children: "New Accordion Heading" },
+                x: 0, y: 0,
+                parentId: newAccordionTriggerId,
+              },
+            ],
+          },
+          {
+            id: newAccordionContentId,
+            type: "AccordionContent",
+            props: {},
+            x: 0, y: 0,
+            parentId: newAccordionItemId,
+            children: [
+              {
+                id: newContentTextId,
+                type: "P",
+                props: { children: "New Accordion Content" },
+                x: 0, y: 0,
+                parentId: newAccordionContentId,
+              },
+            ],
+          },
+        ],
+      };
+
+      const updatedTree = addNodeToParent(get().canvasTree, accordionId, newAccordionItem);
+
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
     },
 
     // Correct implementation of selectedComponent as a method

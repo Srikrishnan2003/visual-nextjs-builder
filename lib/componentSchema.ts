@@ -33,7 +33,11 @@ export const propSchemas: Record<string, PropField[]> = {
   ],
   FlexBox: [
     { key: "direction", label: "Direction", type: "select", options: ["row", "col"] },
-    { key: "gap", label: "Gap", type: "select", options: ["0", "2", "4", "6", "8"] },
+    { key: "gap", label: "Gap", type: "select", options: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12", "16"] },
+    { key: "justifyContent", label: "Justify Content", type: "select", options: ["justify-start", "justify-end", "justify-center", "justify-between", "justify-around", "justify-evenly"] },
+    { key: "alignItems", label: "Align Items", type: "select", options: ["items-start", "items-end", "items-center", "items-baseline", "items-stretch"] },
+    { key: "flexWrap", label: "Flex Wrap", type: "select", options: ["flex-wrap", "flex-nowrap", "flex-wrap-reverse"] },
+    { key: "alignContent", label: "Align Content", type: "select", options: ["content-start", "content-end", "content-center", "content-between", "content-around", "content-evenly"] },
     { key: "className", label: "CSS Class", type: "className" },
   ],
   P: [
@@ -48,6 +52,19 @@ export const propSchemas: Record<string, PropField[]> = {
   Accordion: [
     { key: "type", label: "Type", type: "select", options: ["single", "multiple"] },
     { key: "collapsible", label: "Collapsible", type: "boolean" },
+    { key: "defaultValue", label: "Default Open Item(s)", type: "string" },
+    { key: "className", label: "CSS Class", type: "className" },
+  ],
+  AccordionItem: [
+    { key: "value", label: "Item Value", type: "string" },
+    { key: "className", label: "CSS Class", type: "className" },
+  ],
+  AccordionTrigger: [
+    { key: "children", label: "Content", type: "string" },
+    { key: "className", label: "CSS Class", type: "className" },
+  ],
+  AccordionContent: [
+    { key: "children", label: "Content", type: "string" },
     { key: "className", label: "CSS Class", type: "className" },
   ],
   Tabs: [
