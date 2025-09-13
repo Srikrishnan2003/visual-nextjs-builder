@@ -77,3 +77,10 @@ ${jsx}
 
   return `${imports ? imports + "\n\n" : ""}${wrappedJsx}`;
 }
+
+export function generateCodeForNode(node: ComponentNode): string {
+  if (!node) return "";
+  // We don't need to track usedCustomComponents for a single node editor
+  const usedCustomComponents = new Set<string>();
+  return generateCode(node, 0, usedCustomComponents);
+}

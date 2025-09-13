@@ -1,14 +1,15 @@
-"use client";
+'use client';
 
 import { useCanvasStore } from "@/stores/canvasStore";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Switch } from "./ui/switch"; // add a switch for boolean fields
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"; // for dropdown
+import { Switch } from "./ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { ClassSelectorPopover } from "./ClassSelectorPopover";
 import { ComponentNode } from "@/types/component-nodes";
 import { propSchemas } from "@/lib/componentSchema";
 import { useCallback } from "react";
+import { IconControl } from "./IconControl";
 
 export function PropertiesPanel() {
   const { canvasTree, selectedId, updateProps } = useCanvasStore();
@@ -34,11 +35,17 @@ export function PropertiesPanel() {
     );
   }
 
-  const schema = propSchemas[selectedComponent.type] || [];
+  const isButton = selectedComponent.type === "Button";
+  const schema = (propSchemas[selectedComponent.type] || []).filter(field => {
+    // Hide original icon fields for Button since we have a custom control
+    return isButton ? !["iconLeft", "iconRight"].includes(field.key) : true;
+  });
 
   return (
     <div className="p-4 h-full space-y-4 bg-slate-100/50 rounded-lg shadow-md overflow-y-auto">
       <h2 className="font-bold text-xl text-slate-900 mb-4 tracking-wide border-b pb-2 border-slate-200">Properties</h2>
+
+      {isButton && <IconControl selectedComponent={selectedComponent} updateProps={updateProps} />}
 
       {schema.map((field) => {
         const value = selectedComponent.props[field.key] || "";

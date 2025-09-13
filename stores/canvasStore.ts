@@ -3,15 +3,19 @@ import { v4 as uuid } from "uuid";
 import { ComponentNode } from "@/types/component-nodes";
 import { useFileSystemStore } from "./useFileSystemStore";
 
+export type Viewport = "desktop" | "tablet" | "mobile";
+
 interface CanvasState {
   canvasTree: ComponentNode[];
   selectedId: string | null;
+  viewport: Viewport;
   addComponent: (type: string, parentId?: string) => void;
   addComponentToParent: (type: string, parentId: string) => void;
   moveComponent: (id: string, x: number, y: number) => void;
   selectComponent: (id: string) => void;
   updateProps: (id: string, newProps: Record<string, any>) => void;
   setCanvasTree: (tree: ComponentNode[]) => void;
+  setViewport: (viewport: Viewport) => void;
 }
 
 function insertComponent(
@@ -63,6 +67,9 @@ function updateComponentPosition(
 export const useCanvasStore = create<CanvasState>((set, get) => ({
   canvasTree: [],
   selectedId: null,
+  viewport: "desktop",
+
+  setViewport: (viewport) => set({ viewport }),
 
   addComponent: (type, parentId) => {
     const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
