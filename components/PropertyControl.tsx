@@ -26,7 +26,7 @@ const PropertyControl: React.FC<PropertyControlProps> = React.memo(
               <Input
                 id={field.key}
                 name={field.key}
-                value={value}
+                value={typeof value === 'string' ? value : ''}
                 onChange={(e) => updateProps(componentId, { [field.key]: e.target.value })}
                 className="rounded-md border-slate-200 focus:ring-blue-500 focus:border-blue-500 p-2 text-sm"
               />
