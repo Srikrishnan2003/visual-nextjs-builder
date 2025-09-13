@@ -313,10 +313,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const selectedNode = findNodeById(canvasTree, id);
 
       if (selectedNode && selectedNode.type === "AccordionItem") {
-        // If AccordionItem is clicked, select its first AccordionTrigger child
+        // Find the AccordionTrigger child within the selected AccordionItem
         const accordionTriggerChild = selectedNode.children?.find(
           (child) => child.type === "AccordionTrigger"
         );
+
         if (accordionTriggerChild) {
           set(() => ({ selectedId: accordionTriggerChild.id }));
           return; // Exit to prevent setting selectedId to AccordionItem
