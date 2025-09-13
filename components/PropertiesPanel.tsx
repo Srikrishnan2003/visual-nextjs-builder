@@ -18,7 +18,7 @@ export function PropertiesPanel() {
 
   if (!selectedComponent) {
     return (
-      <div className="p-3 border-l border-gray-100 h-full bg-gray-50 rounded-lg shadow-md">
+      <div className="p-3 border-l border-gray-100 h-full bg-gray-50 rounded-lg shadow-md flex items-center justify-center text-center">
         <p className="text-gray-500 text-sm">No component selected</p>
       </div>
     );

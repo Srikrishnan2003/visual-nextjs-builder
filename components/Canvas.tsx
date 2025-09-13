@@ -15,7 +15,7 @@ export default function Canvas() {
 
   return (
     <div
-      className="relative flex-1 h-full p-4 rounded-2xl shadow-xl overflow-auto bg-slate-50 flex justify-center"
+      className="relative flex-1 h-full p-4 rounded-2xl shadow-lg overflow-auto bg-slate-50 flex justify-center"
     >
       {/* Dot Pattern */}
       <div 
@@ -31,7 +31,7 @@ export default function Canvas() {
         className={cn(
           "relative bg-white shadow-lg transition-all duration-300 ease-in-out",
           // If desktop, it takes full width and height. Otherwise, it has a border and is inset.
-          viewport === 'desktop' ? 'w-full h-full' : 'w-full border my-4 rounded-lg'
+          viewport === 'desktop' ? 'w-full h-full' : 'w-full border-2 border-slate-200 my-4 rounded-lg'
         )}
         style={{ maxWidth: viewportWidths[viewport] }}
       >

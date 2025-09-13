@@ -29,7 +29,7 @@ export function CustomComponentPanel() {
 
   return (
     <div className="mt-4 px-4">
-      <h4 className="text-md text-slate-800 font-bold mb-3 border-b pb-2 border-slate-200">Custom Components</h4>
+      <h4 className="text-lg text-slate-800 font-bold mb-3 border-b pb-2 border-slate-200 tracking-wide">Custom Components</h4>
       <div className="space-y-2 pt-2">
         {customComponents.map((comp) => (
           <button

@@ -57,7 +57,7 @@ export function ClassSelectorPopover({ selectedClasses, onUpdate }: ClassSelecto
             <PopoverTrigger asChild>
                 <Button variant="outline" className="shadow-sm rounded-md border-slate-200 text-slate-700 hover:bg-slate-100">Edit Class</Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-xl shadow-2xl bg-white/90 backdrop-blur-sm p-5 border border-slate-100">
+            <PopoverContent className="w-[300px] max-h-[400px] overflow-auto space-y-4 rounded-xl shadow-xl bg-white/90 backdrop-blur-sm p-5 border border-slate-100">
                 {Object.entries(tailwindClassOptions).map(([groupKey, group]) => (
                     <div key={groupKey}>
                         <p className="font-semibold mb-2 text-slate-700 whitespace-normal break-words text-md">{group.label}</p>

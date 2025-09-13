@@ -20,7 +20,7 @@ export default function ComponentToolbar() {
 
   return (
     <div className="p-4 h-full bg-slate-100/50 rounded-lg shadow-md overflow-y-auto">
-      <h2 className="text-md font-bold mb-4 text-slate-900 tracking-wide">Components</h2>
+      <h2 className="text-md font-bold mb-4 text-slate-900 tracking-wide border-b pb-2 border-slate-200">Components</h2>
       {COMPONENTS.map((comp) => (
         <button
           key={comp.type}

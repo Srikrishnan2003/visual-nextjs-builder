@@ -62,7 +62,7 @@ export default function CustomComponentConfirmDialog({ componentType, onClose }:
 
     return (
         <Dialog open={open} onOpenChange={() => { setOpen(false); onClose(); }}>
-            <DialogContent className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-100 p-6 space-y-6">
+            <DialogContent className="bg-white/90 backdrop-blur-sm rounded-xl shadow-xl border border-slate-100 p-6 space-y-6">
                 <DialogTitle className="text-2xl font-bold text-slate-800">Custom Component</DialogTitle>
                 <h2 className="font-bold text-lg text-slate-800">
                     Add &quot;<span className="text-blue-600">{componentType}</span>&quot; to which page?

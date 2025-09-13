@@ -29,7 +29,7 @@ export function ClassOptionDialog({ category, options, onSelect, onClose }: Clas
                     </Button>
                 ))}
             </div>
-            <Button variant="outline" size="sm" onClick={onClose} className="mt-4 w-full shadow-sm border-slate-200 text-slate-700 hover:bg-slate-100">
+            <Button variant="outline" size="sm" onClick={onClose} className="mt-4 w-full shadow-sm border-slate-200 text-slate-700 hover:bg-slate-100 hover:shadow-md">
                 Back
             </Button>
         </div>

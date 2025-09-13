@@ -22,7 +22,7 @@ export function FileExplorer() {
     } = useFileSystemStore();
 
     return (
-        <div className="text-sm px-3 pt-3 text-slate-800">
+        <div className="text-sm px-3 pt-3 text-slate-800 border-t border-slate-200 pt-4">
             <FileNodeItem node={root} />
         </div>
     );

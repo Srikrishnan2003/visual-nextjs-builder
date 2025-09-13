@@ -19,7 +19,7 @@ export default function AddConfirmDialog({ componentType, onClose }: Props) {
 
   return (
     <Dialog open={!!componentType} onOpenChange={onClose}>
-      <DialogContent className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-100 p-6">
+      <DialogContent className="bg-white/90 backdrop-blur-sm rounded-xl shadow-xl border border-slate-100 p-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-slate-800">Add Component</DialogTitle>
         </DialogHeader>
