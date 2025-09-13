@@ -4,13 +4,14 @@ import { componentRegistry } from "@/lib/componentRegistry";
 import { ComponentNode } from "@/types/component-nodes";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { useFileSystemStore } from "@/stores/useFileSystemStore";
+import { cn } from "@/lib/utils";
 
 interface ComponentWrapperProps {
   node: ComponentNode;
 }
 
 export function ComponentWrapper({ node }: ComponentWrapperProps) {
-  const { selectComponent, selectedId, addComponentToParent, moveComponent } = useCanvasStore();
+  const { selectComponent, selectedId, addComponentToParent, moveComponent, nestingMode, nestingTargetId, performNesting } = useCanvasStore();
   const { root } = useFileSystemStore();
 
   const Comp = componentRegistry[node.type];
@@ -18,7 +19,18 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    selectComponent(node.id);
+    if (nestingMode) {
+      if (node.id === nestingTargetId) {
+        // Clicking on the target div itself, do nothing or show a message
+        console.log("Cannot nest a component into itself or its target div.");
+        return;
+      }
+      // Perform nesting if in nesting mode and not clicking the target div
+      performNesting(node.id);
+    } else {
+      // Normal selection mode
+      selectComponent(node.id);
+    }
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -58,32 +70,63 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
 
   const customTree = !Comp ? findCustomComponentTree(node.type) : null;
 
-  // ✅ Case 1: Built-in Component → absolute + draggable
+  // Determine if the component is selectable for nesting
+  const isSelectableForNesting = nestingMode && node.id !== nestingTargetId;
+
+  // ✅ Case 1: Built-in Component
   if (Comp) {
-    return (
-      <DraggableComponent
-        initialPosition={{ x: node.x ?? 0, y: node.y ?? 0 }}
-        onPositionChange={handlePositionChange}
-        onClick={handleClick}
-        isSelected={isSelected}
-        disabled={isChild}
-        onContextMenu={handleContextMenu}
-        className="" // Remove padding, DraggableComponent handles styling
-      >
-        <Comp {...node.props}>
-          {node.props.children}
-          {node.children?.map((child) => (
-            <ComponentWrapper key={child.id} node={child} />
-          ))}
-        </Comp>
-      </DraggableComponent>
+    const commonProps = {
+      onClick: handleClick,
+      onContextMenu: handleContextMenu,
+      className: cn(
+        isSelected && "border-2 border-blue-500",
+        isSelectableForNesting && "border-2 border-dashed border-blue-500 cursor-pointer",
+        "" // Remove padding, DraggableComponent handles styling
+      )
+    };
+
+    const content = (
+      <Comp {...node.props}>
+        {node.props.children}
+        {node.children?.map((child) => (
+          <ComponentWrapper key={child.id} node={child} />
+        ))}
+      </Comp>
     );
+
+    if (isChild) {
+      // If it's a child, don't make it draggable, let parent layout handle it
+      return (
+        <div {...commonProps}>
+          {content}
+        </div>
+      );
+    } else {
+      // If it's a top-level component, make it draggable
+      return (
+        <DraggableComponent
+          initialPosition={{ x: node.x ?? 0, y: node.y ?? 0 }}
+          onPositionChange={handlePositionChange}
+          isSelected={isSelected}
+          {...commonProps}
+        >
+          {content}
+        </DraggableComponent>
+      );
+    }
   }
 
   // ✅ Case 2: Custom Component → just render internal layout, no drag or position
   if (customTree) {
     return (
-      <div onClick={handleClick} onContextMenu={handleContextMenu}>
+      <div 
+        onClick={handleClick} 
+        onContextMenu={handleContextMenu}
+        className={cn(
+          isSelected && "border-2 border-blue-500",
+          isSelectableForNesting && "border-2 border-dashed border-blue-500 cursor-pointer"
+        )}
+      >
         {customTree.map((childNode) => (
           <ComponentWrapper key={childNode.id} node={childNode} />
         ))}

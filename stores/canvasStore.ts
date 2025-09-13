@@ -10,6 +10,8 @@ interface CanvasState {
   selectedId: string | null;
   selectedComponent: () => ComponentNode | null; // Corrected derived property as a method
   viewport: Viewport;
+  nestingMode: boolean; // New: true when selecting a component to nest
+  nestingTargetId: string | null; // New: ID of the Div to nest into
   history: ComponentNode[][];
   historyIndex: number;
   addComponent: (type: string, parentId?: string) => void;
@@ -21,6 +23,9 @@ interface CanvasState {
   setViewport: (viewport: Viewport) => void;
   undo: () => void;
   redo: () => void;
+  startNesting: (targetDivId: string) => void; // New: Initiates nesting mode
+  cancelNesting: () => void; // New: Cancels nesting mode
+  performNesting: (componentToNestId: string) => void; // New: Performs the actual nesting
 }
 
 // Helper function to find a node by its ID in the tree (moved from PropertiesPanel)
@@ -33,6 +38,30 @@ function findNodeById(nodes: ComponentNode[], id: string): ComponentNode | null 
     }
   }
   return null;
+}
+
+// Helper to remove a node from the tree
+function removeNodeById(nodes: ComponentNode[], idToRemove: string): ComponentNode[] {
+  return nodes.filter(node => node.id !== idToRemove).map(node => ({
+    ...node,
+    children: node.children ? removeNodeById(node.children, idToRemove) : node.children,
+  }));
+}
+
+// Helper to add a node to a specific parent
+function addNodeToParent(nodes: ComponentNode[], parentId: string, nodeToAdd: ComponentNode): ComponentNode[] {
+  return nodes.map(node => {
+    if (node.id === parentId) {
+      return {
+        ...node,
+        children: [...(node.children || []), nodeToAdd],
+      };
+    }
+    return {
+      ...node,
+      children: node.children ? addNodeToParent(node.children, parentId, nodeToAdd) : node.children,
+    };
+  });
 }
 
 function insertComponent(
@@ -81,6 +110,26 @@ function updateComponentPosition(
   });
 }
 
+// Helper to recursively update props of a node by ID
+function updateNodePropsById(
+  nodes: ComponentNode[],
+  idToUpdate: string,
+  newProps: Record<string, any>
+): ComponentNode[] {
+  return nodes.map((node) => {
+    if (node.id === idToUpdate) {
+      return { ...node, props: { ...node.props, ...newProps } };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: updateNodePropsById(node.children, idToUpdate, newProps),
+      };
+    }
+    return node;
+  });
+}
+
 export const useCanvasStore = create<CanvasState>((set, get) => {
   // This helper function wraps our state updates to manage the history.
   const setWithHistory = (newTree: ComponentNode[]) => {
@@ -100,10 +149,44 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     canvasTree: [],
     selectedId: null,
     viewport: "desktop",
+    nestingMode: false,
+    nestingTargetId: null,
     history: [[]], // Start with an initial empty state
     historyIndex: 0,
 
     setViewport: (viewport) => set({ viewport }),
+
+    // Correct implementation of selectedComponent as a method
+    selectedComponent: () => {
+      const { canvasTree, selectedId } = get();
+      return selectedId ? findNodeById(canvasTree, selectedId) : null;
+    },
+
+    startNesting: (targetDivId) => set({ nestingMode: true, nestingTargetId: targetDivId, selectedId: null }),
+    cancelNesting: () => set({ nestingMode: false, nestingTargetId: null }),
+
+    performNesting: (componentToNestId) => {
+      const { canvasTree, nestingTargetId, selectedFileId } = get();
+      if (!nestingTargetId) return; // Should not happen if nestingMode is true
+
+      // 1. Find the component to nest
+      const componentToNest = findNodeById(canvasTree, componentToNestId);
+      if (!componentToNest) return; // Component not found
+
+      // 2. Remove it from its current position
+      const treeAfterRemoval = removeNodeById(canvasTree, componentToNestId);
+
+      // 3. Add it as a child to the target Div
+      const treeAfterNesting = addNodeToParent(treeAfterRemoval, nestingTargetId, { ...componentToNest, parentId: nestingTargetId, x: 0, y: 0 });
+
+      // 4. Update store and history
+      const { updateFileCanvasTree } = useFileSystemStore.getState();
+      updateFileCanvasTree(selectedFileId!, treeAfterNesting);
+      setWithHistory(treeAfterNesting);
+
+      // 5. Reset nesting mode and select the new parent
+      set({ nestingMode: false, nestingTargetId: null, selectedId: nestingTargetId });
+    },
 
     addComponent: (type, parentId) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
@@ -166,9 +249,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     updateProps: (id, newProps) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-      const updatedTree = get().canvasTree.map((node) =>
-        node.id === id ? { ...node, props: { ...node.props, ...newProps } } : node
-      );
+      const updatedTree = updateNodePropsById(get().canvasTree, id, newProps);
 
       updateFileCanvasTree(selectedFileId!, updatedTree);
       setWithHistory(updatedTree);

@@ -22,6 +22,13 @@ export const propSchemas: Record<string, PropField[]> = {
   ],
   Div: [
     { key: "children", label: "Content", type: "string" },
+    { key: "display", label: "Display", type: "select", options: ["block", "flex"] },
+    { key: "flexDirection", label: "Flex Direction", type: "select", options: ["row", "col"] },
+    { key: "justifyContent", label: "Justify Content", type: "select", options: ["justify-start", "justify-center", "justify-end", "justify-between", "justify-around"] },
+    { key: "alignItems", label: "Align Items", type: "select", options: ["items-start", "items-center", "items-end", "items-stretch"] },
+    { key: "gap", label: "Gap", type: "select", options: ["gap-0", "gap-1", "gap-2", "gap-3", "gap-4", "gap-5", "gap-6", "gap-8"] },
+    { key: "padding", label: "Padding", type: "select", options: ["p-0", "p-1", "p-2", "p-3", "p-4", "p-5", "p-6", "p-8"] },
+    { key: "bgColor", label: "Background Color", type: "select", options: ["bg-white", "bg-gray-100", "bg-blue-500", "bg-red-500", "bg-green-500", "bg-yellow-500"] },
     { key: "className", label: "CSS Class", type: "className" },
   ],
   FlexBox: [

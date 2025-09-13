@@ -1,12 +1,13 @@
 'use client';
 
-import { Rocket, Laptop, Tablet, Smartphone, Undo2, Redo2 } from "lucide-react";
+import { Rocket, Laptop, Tablet, Smartphone, Undo2, Redo2, X } from "lucide-react";
 import ExportZipButton from "./ExportZipButton";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 export default function Topbar() {
-    const { viewport, setViewport, undo, redo } = useCanvasStore();
+    const { viewport, setViewport, undo, redo, nestingMode, cancelNesting } = useCanvasStore();
     const canUndo = useCanvasStore((state) => state.historyIndex > 0);
     const canRedo = useCanvasStore((state) => state.historyIndex < state.history.length - 1);
 
@@ -30,10 +31,21 @@ export default function Topbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-lg">
-                    <Undo2 className={historyIconStyle(!canUndo)} onClick={canUndo ? undo : undefined} />
-                    <Redo2 className={historyIconStyle(!canRedo)} onClick={canRedo ? redo : undefined} />
-                </div>
+                {nestingMode ? (
+                    <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={cancelNesting}
+                        className="flex items-center gap-1"
+                    >
+                        <X size={16} /> Cancel Nesting
+                    </Button>
+                ) : (
+                    <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-lg">
+                        <Undo2 className={historyIconStyle(!canUndo)} onClick={canUndo ? undo : undefined} />
+                        <Redo2 className={historyIconStyle(!canRedo)} onClick={canRedo ? redo : undefined} />
+                    </div>
+                )}
 
                 <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-lg">
                     <Laptop className={viewportIconStyle('desktop')} onClick={() => setViewport('desktop')} />

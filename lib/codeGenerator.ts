@@ -48,14 +48,18 @@ function generateCode(
 
   const textContent = typeof innerText === "string" ? innerText : "";
 
-  const nestedComponents = children
+  const nestedComponentsCode = children
     .map((child) => generateCode(child, indentLevel + 1, usedCustomComponents))
     .join("\n");
 
-  if (nestedComponents || textContent) {
-    return `${indent}${openingTag}
-${textContent ? indent + "  " + textContent + "\n" : ""}${nestedComponents}
-${indent}${closingTag}`;
+  // If there are actual nested components, prioritize them.
+  // The 'children' prop (text content) is usually a placeholder for containers.
+  const contentToRender = nestedComponentsCode
+    ? nestedComponentsCode
+    : (textContent ? indent + "  " + textContent + "\n" : "");
+
+  if (contentToRender) {
+    return `${indent}${openingTag}\n${contentToRender}\n${indent}${closingTag}`;
   } else {
     return `${indent}${openingTag}${closingTag}`;
   }

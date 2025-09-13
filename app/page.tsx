@@ -10,12 +10,22 @@ import Canvas from "@/components/Canvas";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { FileExplorer } from "@/components/FileExplorer";
 import CodeEditor from "@/components/CodeEditor";
+import { useCanvasStore } from "@/stores/canvasStore";
+import { generateCodeFromTree } from "@/lib/codeGenerator";
 
 export default function Home() {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] = useState(false); // New state for Properties Panel
   const [fileExplorerCollapsed, setFileExplorerCollapsed] = useState(false);
   const [codeEditorCollapsed, setCodeEditorCollapsed] = useState(false); // New state for Code Editor
+
+  const { canvasTree } = useCanvasStore();
+  const [generatedCode, setGeneratedCode] = useState<string>("");
+
+  useEffect(() => {
+    const code = generateCodeFromTree(canvasTree);
+    setGeneratedCode(code);
+  }, [canvasTree]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -73,7 +83,7 @@ export default function Home() {
             collapsed={codeEditorCollapsed}
             setCollapsed={setCodeEditorCollapsed}
           >
-            <CodeEditor />
+            <CodeEditor code={generatedCode} />
           </CollapsiblePanel>
 
         </div>
