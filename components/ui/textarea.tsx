@@ -1,18 +1,36 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { Label } from "./label"
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
-      {...props}
-    />
-  )
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+    label?: string;
+    helperText?: string;
+    disabled?: boolean;
+    readOnly?: boolean;
+    rows?: number;
+  }
+
+function Textarea({ className, label, helperText, disabled, readOnly, rows, ...restProps }: TextareaProps) {
+    return (
+      <div className="grid w-full items-center gap-1.5">
+        {label && <Label htmlFor={restProps.id}>{label}</Label>}
+        <textarea
+          className={cn(
+            "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+          disabled={disabled}
+          readOnly={readOnly}
+          rows={rows}
+          {...restProps}
+        />
+        {helperText && <p className="text-sm text-muted-foreground">{helperText}</p>}
+      </div>
+    )
 }
+
+Textarea.displayName = "Textarea"
 
 export { Textarea }

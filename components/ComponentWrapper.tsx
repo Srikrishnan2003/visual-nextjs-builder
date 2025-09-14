@@ -91,8 +91,8 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
         stylingClasses.push(node.props[key]);
       } else if (key === "className") {
         baseClassName = node.props[key];
-      } else if (key === "children" && VOID_ELEMENTS.includes(node.type)) {
-        // Explicitly skip children prop for void elements
+      } else if (key === "children" && (VOID_ELEMENTS.includes(node.type) || node.type === "Textarea")) {
+        // Explicitly skip children prop for void elements and Textarea
         continue;
       } else {
         otherProps[key] = node.props[key];
@@ -127,6 +127,9 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
             <ComponentWrapper key={child.id} node={child} /> // Reverted Tabs children rendering
           ))}
         </Comp>
+      ) : node.type === "Textarea" ? (
+        <Comp {...commonProps} defaultValue={node.props.children || ''}>
+        </Comp>
       ) : (
         <Comp {...commonProps}>
           {node.type !== 'Alert' && node.props.children}
@@ -140,9 +143,10 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
 
     if (isChild) {
       // If it's a child, don't make it draggable, let parent layout handle it
-      const { collapsible, ...rest } = commonProps;
+      const propsForDiv = { ...commonProps };
+      delete propsForDiv.collapsible;
       return (
-        <div {...rest}>
+        <div {...propsForDiv}>
           {content}
         </div>
       );

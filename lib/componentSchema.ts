@@ -42,6 +42,7 @@ const textStylingProps: PropField[] = [
 export const propSchemas: Record<string, PropField[]> = {
   Button: [
     { key: "children", label: "Text", type: "string" },
+    { key: "value", label: "Value", type: "string" },
     { key: "disabled", label: "Disabled", type: "boolean" },
     { key: "isLoading", label: "Is Loading", type: "boolean" },
     { key: "loadingText", label: "Loading Text", type: "string" },
@@ -176,12 +177,17 @@ export const propSchemas: Record<string, PropField[]> = {
     ...commonStylingProps,
   ],
   Textarea: [
+    { key: "label", label: "Label", type: "string" },
     { key: "placeholder", label: "Placeholder", type: "string" },
+    { key: "helperText", label: "Helper Text", type: "string" },
+    { key: "disabled", label: "Disabled", type: "boolean" },
+    { key: "readOnly", label: "Read Only", type: "boolean" },
+    { key: "rows", label: "Rows", type: "number" },
     { key: "className", label: "CSS Class", type: "className" },
     ...commonStylingProps,
   ],
   Checkbox: [
-    { key: "label", label: "Label", type: "string" },
+    { key: "value", label: "Value", type: "string" },
     { key: "checked", label: "Checked", type: "boolean" },
     { key: "className", label: "CSS Class", type: "className" },
     ...commonStylingProps,

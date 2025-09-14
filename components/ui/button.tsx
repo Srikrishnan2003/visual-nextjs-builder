@@ -46,6 +46,7 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
   href?: string;
   target?: "_self" | "_blank";
   type?: "button" | "submit" | "reset";
+  value?: string;
 }
 
 function Button({
@@ -61,6 +62,7 @@ function Button({
   href,
   target,
   type = "button",
+  value,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
@@ -97,6 +99,7 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       disabled={isLoading || props.disabled}
       type={type}
+      value={value}
       {...props}
     >
       {content}
