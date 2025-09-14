@@ -14,7 +14,7 @@ interface PropertyControlProps {
   updateProps: (id: string, newProps: Record<string, any>) => void;
 }
 
-const PropertyControl: React.FC<PropertyControlProps> = React.memo(
+const PropertyControl: React.FC<PropertyControlProps> = (
   ({ field, value, componentId, updateProps }) => {
 
     switch (field.type) {

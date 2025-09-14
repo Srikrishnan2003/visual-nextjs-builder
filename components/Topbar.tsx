@@ -5,11 +5,14 @@ import ExportZipButton from "./ExportZipButton";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "./ui/toast";
 
 export default function Topbar() {
     const { viewport, setViewport, undo, redo, nestingMode, cancelNesting } = useCanvasStore();
     const canUndo = useCanvasStore((state) => state.historyIndex > 0);
     const canRedo = useCanvasStore((state) => state.historyIndex < state.history.length - 1);
+    const { toast } = useToast();
 
     const viewportIconStyle = (current: typeof viewport) => cn(
         "p-2 rounded-lg cursor-pointer transition-colors",
@@ -55,6 +58,19 @@ export default function Topbar() {
             </div>
 
             <div className="space-x-3">
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Scheduled: Catch up",
+                      description: "Friday, February 10, 2023 at 5:57 PM",
+                      action: (
+                        <ToastAction altText="Goto schedule to undo">Undo</ToastAction>
+                      ),
+                    })
+                  }}
+                >
+                  Show Toast
+                </Button>
                 <ExportZipButton />
             </div>            
         </div>

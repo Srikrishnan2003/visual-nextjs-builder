@@ -86,6 +86,7 @@ function generateGlobalsCss() {
 function generateLayoutTsx() {
   return `"use client";
 import './globals.css';
+import { useEffect } from 'react';
 
 export const metadata = {
   title: 'Exported Project',
@@ -93,6 +94,34 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const closeButtons = document.querySelectorAll('[data-slot="alert-close"]');
+    closeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const alert = button.closest('[data-slot="alert"]');
+        if (alert) {
+          alert.style.display = 'none';
+        }
+      });
+    });
+
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+            const alertId = href.substring(1);
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert.style.display = 'block';
+                });
+            }
+        }
+    });
+
+  }, []);
+
   return (
     <html lang="en">
       <body>{children}</body>

@@ -14,6 +14,8 @@ interface CanvasState {
   nestingTargetId: string | null; // New: ID of the Div to nest into
   history: ComponentNode[][];
   historyIndex: number;
+  expandedParentId: string | null; // New: ID of the parent whose children are currently expanded/highlighted
+  selectedTabItemIds: { triggerId: string | null, contentId: string | null }; // New: Stores the IDs of the selected tab item pair
   addComponent: (type: string, parentId?: string) => void;
   addComponentToParent: (type: string, parentId: string) => void;
   moveComponent: (id: string, x: number, y: number) => void;
@@ -27,6 +29,8 @@ interface CanvasState {
   cancelNesting: () => void; // New: Cancels nesting mode
   performNesting: (componentToNestId: string) => void; // New: Performs the actual nesting
   addAccordionItem: (accordionId: string) => void; // New: Adds an AccordionItem to an Accordion
+  removeComponent: (id: string) => void; // New: Removes a component from the canvas
+  addTabItem: (tabsId: string) => void; // New: Adds a TabsTrigger and TabsContent pair to a Tabs component
 }
 
 // Helper function to find a node by its ID in the tree (moved from PropertiesPanel)
@@ -111,30 +115,236 @@ function updateComponentPosition(
   });
 }
 
+// Helper to create complex component nodes with default children
+function createComplexComponentNode(type: string, parentId?: string): ComponentNode {
+  let newComponent: ComponentNode = {
+    id: uuid(),
+    type,
+    props: { children: type },
+    x: 0,
+    y: 0,
+    parentId,
+  };
+
+  if (type === "Accordion") {
+    const accordionItemId = uuid();
+    const accordionTriggerId = uuid();
+    const accordionContentId = uuid();
+    const headingTextId = uuid();
+    const contentTextId = uuid();
+
+    newComponent = {
+      ...newComponent,
+      children: [
+        {
+          id: accordionItemId,
+          type: "AccordionItem",
+          props: { value: `item-${uuid().slice(0, 4)}` },
+          x: 0,
+          y: 0,
+          parentId: newComponent.id,
+          children: [
+            {
+              id: accordionTriggerId,
+              type: "AccordionTrigger",
+              props: {},
+              x: 0, y: 0,
+              parentId: accordionItemId,
+              children: [
+                {
+                  id: headingTextId,
+                  type: "P",
+                  props: { children: "Accordion Heading" },
+                  x: 0, y: 0,
+                  parentId: accordionTriggerId,
+                },
+              ],
+            },
+            {
+              id: accordionContentId,
+              type: "AccordionContent",
+              props: {},
+              x: 0, y: 0,
+              parentId: accordionItemId,
+              children: [
+                {
+                  id: contentTextId,
+                  type: "P",
+                  props: { children: "Accordion Content" },
+                  x: 0, y: 0,
+                  parentId: accordionContentId,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  } else if (type === "Card") {
+    const cardId = newComponent.id;
+    const cardHeaderId = uuid();
+    const cardTitleId = uuid();
+    const cardDescriptionId = uuid();
+    const cardContentId = uuid();
+    const cardFooterId = uuid();
+
+    newComponent = {
+      ...newComponent,
+      props: { className: "w-full max-w-sm" },
+      children: [
+        {
+          id: cardHeaderId,
+          type: "CardHeader",
+          props: {},
+          x: 0, y: 0, parentId: cardId,
+          children: [
+            {
+              id: cardTitleId,
+              type: "CardTitle",
+              props: { children: "Card Title" },
+              x: 0, y: 0, parentId: cardHeaderId,
+            },
+            {
+              id: cardDescriptionId,
+              type: "CardDescription",
+              props: { children: "Card Description" },
+              x: 0, y: 0, parentId: cardHeaderId,
+            },
+          ],
+        },
+        {
+          id: cardContentId,
+          type: "CardContent",
+          props: {},
+          x: 0, y: 0, parentId: cardId,
+          children: [
+            {
+              id: uuid(),
+              type: "P",
+              props: { children: "Card Content" },
+              x: 0, y: 0, parentId: cardContentId,
+            },
+          ],
+        },
+        {
+          id: cardFooterId,
+          type: "CardFooter",
+          props: {},
+          x: 0, y: 0, parentId: cardId,
+          children: [
+            {
+              id: uuid(),
+              type: "P",
+              props: { children: "Card Footer" },
+              x: 0, y: 0, parentId: cardFooterId,
+            },
+          ],
+        },
+      ],
+    };
+  } else if (type === "Tabs") {
+    const tabsId = newComponent.id;
+    const tabsListId = uuid();
+    const tabTrigger1Id = uuid();
+    const tabTrigger2Id = uuid();
+    const tabsContent1Id = uuid();
+    const tabsContent2Id = uuid();
+    const tabContentP1Id = uuid();
+    const tabContentP2Id = uuid();
+
+    newComponent = {
+      ...newComponent,
+      props: { defaultValue: "tab1" },
+      children: [
+        {
+          id: tabsListId,
+          type: "TabsList",
+          props: { className: "flex flex-wrap" }, // Explicitly set flex and wrap
+          x: 0, y: 0, parentId: tabsId,
+          children: [
+            {
+              id: tabTrigger1Id,
+              type: "TabsTrigger",
+              props: { value: "tab1", children: "Tab 1" },
+              x: 0, y: 0, parentId: tabsListId,
+            },
+            {
+              id: tabTrigger2Id,
+              type: "TabsTrigger",
+              props: { value: "tab2", children: "Tab 2" },
+              x: 0, y: 0, parentId: tabsListId,
+            },
+          ],
+        },
+        {
+          id: tabsContent1Id,
+          type: "TabsContent",
+          props: { value: "tab1" },
+          x: 0, y: 0, parentId: tabsId,
+          children: [
+            {
+              id: tabContentP1Id,
+              type: "P",
+              props: { children: "Content for Tab 1" },
+              x: 0, y: 0, parentId: tabsContent1Id,
+            },
+          ],
+        },
+        {
+          id: tabsContent2Id,
+          type: "TabsContent",
+          props: { value: "tab2" },
+          x: 0, y: 0, parentId: tabsId,
+          children: [
+            {
+              id: tabContentP2Id,
+              type: "P",
+              props: { children: "Content for Tab 2" },
+              x: 0, y: 0, parentId: tabsContent2Id,
+            },
+          ],
+        },
+      ],
+    };
+  }
+  return newComponent;
+}
+
 // Helper to recursively update props of a node by ID
 function updateNodePropsById(
   nodes: ComponentNode[],
   idToUpdate: string,
   newProps: Record<string, any>
 ): ComponentNode[] {
-  return nodes.map((node) => {
-    if (node.id === idToUpdate) {
-      // Check if any of the newProps are actually different from the current props
-      const hasChanged = Object.keys(newProps).some(key => node.props[key] !== newProps[key]);
+  let treeHasChanged = false;
 
+  const newNodes = nodes.map((node) => {
+    if (node.id === idToUpdate) {
+      const hasChanged = Object.keys(newProps).some(
+        (key) => node.props[key] !== newProps[key]
+      );
       if (hasChanged) {
+        treeHasChanged = true;
         return { ...node, props: { ...node.props, ...newProps } };
       }
-      return node; // Return the original node if no props have changed
+      return node;
     }
     if (node.children) {
-      return {
-        ...node,
-        children: updateNodePropsById(node.children, idToUpdate, newProps),
-      };
+      const newChildren = updateNodePropsById(
+        node.children,
+        idToUpdate,
+        newProps
+      );
+      if (newChildren !== node.children) {
+        treeHasChanged = true;
+        return { ...node, children: newChildren };
+      }
+      return node;
     }
     return node;
   });
+
+  return treeHasChanged ? newNodes : nodes;
 }
 
 export const useCanvasStore = create<CanvasState>((set, get) => {
@@ -160,6 +370,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     nestingTargetId: null,
     history: [[]], // Start with an initial empty state
     historyIndex: 0,
+    expandedParentId: null, // Initialize new state variable
+    selectedTabItemIds: { triggerId: null, contentId: null }, // Initialize new state variable
 
     setViewport: (viewport) => set({ viewport }),
 
@@ -197,69 +409,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     addComponent: (type, parentId) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-      let newComponent: ComponentNode = {
-        id: uuid(),
-        type,
-        props: { children: type },
-        x: 50,
-        y: 50,
-      };
-
-      if (type === "Accordion") {
-        const accordionItemId = uuid();
-        const accordionTriggerId = uuid();
-        const accordionContentId = uuid();
-        const headingTextId = uuid();
-        const contentTextId = uuid();
-
-        newComponent = {
-          ...newComponent,
-          children: [
-            {
-              id: accordionItemId,
-              type: "AccordionItem",
-              props: { value: `item-${uuid().slice(0, 4)}` },
-              x: 0,
-              y: 0,
-              parentId: newComponent.id,
-              children: [
-                {
-                  id: accordionTriggerId,
-                  type: "AccordionTrigger",
-                  props: {},
-                  x: 0, y: 0,
-                  parentId: accordionItemId,
-                  children: [
-                    {
-                      id: headingTextId,
-                      type: "P",
-                      props: { children: "Accordion Heading" },
-                      x: 0, y: 0,
-                      parentId: accordionTriggerId,
-                    },
-                  ],
-                },
-                {
-                  id: accordionContentId,
-                  type: "AccordionContent",
-                  props: {},
-                  x: 0, y: 0,
-                  parentId: accordionItemId,
-                  children: [
-                    {
-                      id: contentTextId,
-                      type: "P",
-                      props: { children: "Accordion Content" },
-                      x: 0, y: 0,
-                      parentId: accordionContentId,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        };
-      }
+      const newComponent = createComplexComponentNode(type, parentId);
+      newComponent.x = 50;
+      newComponent.y = 50;
 
       const updatedTree = parentId
         ? insertComponent(get().canvasTree, parentId, newComponent)
@@ -271,31 +423,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     addComponentToParent: (type: string, parentId: string) => {
       const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
-      const newNode: ComponentNode = {
-        id: uuid(),
-        type,
-        props: { children: type },
-        x: 0,
-        y: 0,
-        parentId,
-      };
+      const newNode = createComplexComponentNode(type, parentId);
+      const updatedTree = addNodeToParent(get().canvasTree, parentId, newNode);
 
-      const updateChildren = (nodes: ComponentNode[]): ComponentNode[] => {
-        return nodes.map((node) => {
-          if (node.id === parentId) {
-            return {
-              ...node,
-              children: [...(node.children || []), newNode],
-            };
-          }
-          return {
-            ...node, 
-            children: node.children ? updateChildren(node.children) : [],
-          };
-        });
-      };
-
-      const updatedTree = updateChildren(get().canvasTree);
       updateFileCanvasTree(selectedFileId!, updatedTree);
       setWithHistory(updatedTree);
     },
@@ -309,22 +439,99 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     },
           
     selectComponent: (id) => {
-      const { canvasTree } = get();
+      const { canvasTree, selectedId } = get(); // Get selectedId
       const selectedNode = findNodeById(canvasTree, id);
 
-      if (selectedNode && selectedNode.type === "AccordionItem") {
-        // Find the AccordionTrigger child within the selected AccordionItem
-        const accordionTriggerChild = selectedNode.children?.find(
-          (child) => child.type === "AccordionTrigger"
-        );
+      let newSelectedId = id;
+      let newExpandedParentId = null;
+      let newSelectedTabItemIds = { triggerId: null, contentId: null };
 
-        if (accordionTriggerChild) {
-          set(() => ({ selectedId: accordionTriggerChild.id }));
-          return; // Exit to prevent setting selectedId to AccordionItem
+      if (selectedNode) {
+        const parentNode = selectedNode.parentId
+          ? findNodeById(canvasTree, selectedNode.parentId)
+          : null
+
+        // If clicking a child of a TabsContent, and the TabsContent is NOT already selected, select the TabsContent.
+        if (parentNode && parentNode.type === "TabsContent" && parentNode.id !== selectedId) {
+          newSelectedId = parentNode.id
+        } else if (selectedNode.type === "AccordionItem") {
+          const accordionTriggerChild = selectedNode.children?.find(
+            (child) => child.type === "AccordionTrigger"
+          )
+          if (accordionTriggerChild) {
+            newSelectedId = accordionTriggerChild.id
+            newExpandedParentId = accordionTriggerChild.id
+          }
+        } else if (selectedNode.type === "TabsTrigger") {
+          if (selectedNode.parentId) {
+            newSelectedId = selectedNode.parentId; // Selects TabsList
+          }
+          const tabValue = selectedNode.props.value;
+          if (tabValue) {
+            const tabsList = findNodeById(canvasTree, selectedNode.parentId!)
+            if (tabsList && tabsList.parentId) {
+              const tabsComponent = findNodeById(canvasTree, tabsList.parentId)
+
+              if (tabsComponent && tabsComponent.children) {
+                const trigger = tabsList?.children?.find(
+                  (child) =>
+                    child.type === "TabsTrigger" &&
+                    child.props.value === tabValue
+                )
+                const content = tabsComponent.children.find(
+                  (child) =>
+                    child.type === "TabsContent" &&
+                    child.props.value === tabValue
+                )
+
+                if (trigger) newSelectedTabItemIds.triggerId = trigger.id
+                if (content) newSelectedTabItemIds.contentId = content.id
+              }
+            }
+          }
+        } else if (selectedNode.type === "TabsContent") {
+          if (selectedNode.parentId) {
+            newSelectedId = selectedNode.parentId; // Selects Tabs
+          }
+          const tabValue = selectedNode.props.value;
+          if (tabValue) {
+            const tabsComponent = findNodeById(canvasTree, selectedNode.parentId!)
+            if (tabsComponent && tabsComponent.children) {
+              const tabsList = tabsComponent.children.find(
+                (child) => child.type === "TabsList"
+              )
+              const trigger = tabsList?.children?.find(
+                (child) =>
+                  child.type === "TabsTrigger" &&
+                  child.props.value === tabValue
+              )
+              const content = tabsComponent.children.find(
+                (child) =>
+                  child.type === "TabsContent" &&
+                  child.props.value === tabValue
+              )
+
+              if (trigger) newSelectedTabItemIds.triggerId = trigger.id
+              if (content) newSelectedTabItemIds.contentId = content.id
+            }
+          }
+          newExpandedParentId =
+            selectedNode.children && selectedNode.children.length > 0
+              ? selectedNode.id
+              : null
+        } else {
+          newExpandedParentId =
+            selectedNode.children && selectedNode.children.length > 0
+              ? selectedNode.id
+              : null;
         }
       }
-      // For all other components, or if AccordionItem has no Trigger, select the original ID
-      set(() => ({ selectedId: id }));
+
+      set(() => ({
+        selectedId: newSelectedId,
+        expandedParentId: newExpandedParentId,
+        selectedTabItemIds: newSelectedTabItemIds,
+      }));
     },
 
     updateProps: (id, newProps) => {
@@ -427,10 +634,85 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       setWithHistory(updatedTree);
     },
 
-    // Correct implementation of selectedComponent as a method
-    selectedComponent: () => {
-      const { canvasTree, selectedId } = get();
-      return selectedId ? findNodeById(canvasTree, selectedId) : null;
+    addTabItem: (tabsId: string) => {
+      const { updateFileCanvasTree, selectedFileId } = useFileSystemStore.getState();
+      const newTabValue = `tab${uuid().slice(0, 4)}`;
+      const newTabTriggerId = uuid();
+      const newTabContentId = uuid();
+      const newTabContentPId = uuid();
+
+      console.log("addTabItem called for tabsId:", tabsId);
+
+      const newTabTrigger: ComponentNode = {
+        id: newTabTriggerId,
+        type: "TabsTrigger",
+        props: { value: newTabValue, children: `Tab ${uuid().slice(0, 4)}` },
+        x: 0, y: 0,
+        parentId: tabsId, // This will be re-parented to TabsList later
+      };
+
+      const newTabContent: ComponentNode = {
+        id: newTabContentId,
+        type: "TabsContent",
+        props: { value: newTabValue },
+        x: 0, y: 0,
+        parentId: tabsId,
+        children: [
+          {
+            id: newTabContentPId,
+            type: "P",
+            props: { children: `Content for ${newTabValue}` },
+            x: 0, y: 0,
+            parentId: newTabContentId,
+          },
+        ],
+      };
+
+      let updatedTree = get().canvasTree;
+      console.log("Initial canvasTree:", JSON.stringify(updatedTree, null, 2));
+
+      // Find the TabsList and add the new TabsTrigger to it
+      updatedTree = updatedTree.map(node => {
+        if (node.id === tabsId && node.children) {
+          console.log("Found Tabs component:", node.id);
+          return {
+            ...node,
+            children: node.children.map(child => {
+              if (child.type === "TabsList") {
+                console.log("Found TabsList component:", child.id);
+                return {
+                  ...child,
+                  children: [...(child.children || []), { ...newTabTrigger, parentId: child.id }],
+                };
+              }
+              return child;
+            }),
+          };
+        }
+        return node;
+      });
+      console.log("canvasTree after adding trigger:", JSON.stringify(updatedTree, null, 2));
+
+      // Add the new TabsContent directly to the Tabs component
+      updatedTree = addNodeToParent(updatedTree, tabsId, newTabContent);
+      console.log("canvasTree after adding content:", JSON.stringify(updatedTree, null, 2));
+
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+    },
+
+    removeComponent: (idToRemove: string) => {
+      const { canvasTree, selectedId, selectedFileId } = get();
+      const updatedTree = removeNodeById(canvasTree, idToRemove);
+
+      const { updateFileCanvasTree } = useFileSystemStore.getState();
+      updateFileCanvasTree(selectedFileId!, updatedTree);
+      setWithHistory(updatedTree);
+
+      // If the removed component was selected, clear selection
+      if (selectedId === idToRemove) {
+        set({ selectedId: null, expandedParentId: null });
+      }
     },
   };
 });

@@ -32,6 +32,9 @@ function generateCode(
     .filter(Boolean)
     .join(" ");
 
+  const idProp = `id="${node.id}"`;
+  const finalPropString = [idProp, propString].filter(Boolean).join(" ");
+
   // Check if this is a custom component
   const isCustom = !(type in componentRegistry);
   const formattedType = isCustom ? formatComponentName(type) : type;
@@ -41,8 +44,8 @@ function generateCode(
     return `${indent}<${formattedType} />`; // custom components self-close
   }
 
-  const openingTag = propString
-    ? `<${formattedType} ${propString}>`
+  const openingTag = finalPropString
+    ? `<${formattedType} ${finalPropString}>`
     : `<${formattedType}>`;
   const closingTag = `</${formattedType}>`;
 
