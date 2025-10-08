@@ -1,14 +1,17 @@
 'use client';
 
-import { Rocket, Laptop, Tablet, Smartphone, Undo2, Redo2, X } from "lucide-react";
+import { Rocket, Laptop, Tablet, Smartphone, Undo2, Redo2, X, Save, FolderOpen } from "lucide-react";
 import ExportZipButton from "./ExportZipButton";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "./ui/toast";
+import { ProjectDialog } from './dialogs/ProjectDialog';
+import { useState } from "react";
 
 export default function Topbar() {
+    const [projectDialogMode, setProjectDialogMode] = useState<'save' | 'load' | null>(null);
     const { viewport, setViewport, undo, redo, nestingMode, cancelNesting } = useCanvasStore();
     const canUndo = useCanvasStore((state) => state.historyIndex > 0);
     const canRedo = useCanvasStore((state) => state.historyIndex < state.history.length - 1);
@@ -56,6 +59,23 @@ export default function Topbar() {
                     <Smartphone className={viewportIconStyle('mobile')} onClick={() => setViewport('mobile')} />
                 </div>
             </div>
+            <div className="space-x-3">
+                <Button
+                    variant="outline"
+                    onClick={() => setProjectDialogMode('save')}
+                >
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={() => setProjectDialogMode('load')}
+                >
+                    <FolderOpen className="mr-2 h-4 w-4" />
+                    Load
+                </Button>
+                <ExportZipButton />
+            </div>
 
             <div className="space-x-3">
                 <Button
@@ -71,8 +91,11 @@ export default function Topbar() {
                 >
                   Show Toast
                 </Button>
-                <ExportZipButton />
-            </div>            
+            </div> 
+            <ProjectDialog 
+                mode={projectDialogMode} 
+                onClose={() => setProjectDialogMode(null)} 
+            />           
         </div>
     );
 }

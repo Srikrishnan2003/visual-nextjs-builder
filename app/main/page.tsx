@@ -12,6 +12,8 @@ import { FileExplorer } from "@/components/FileExplorer";
 import CodeEditor from "@/components/CodeEditor";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { generateCodeFromTree } from "@/lib/codeGenerator";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { perfMonitor } from "@/lib/performace";
 
 export default function Home() {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
@@ -22,10 +24,20 @@ export default function Home() {
   const { canvasTree } = useCanvasStore();
   const [generatedCode, setGeneratedCode] = useState<string>("");
 
+  // useEffect(() => {
+  //   const code = generateCodeFromTree(canvasTree);
+  //   setGeneratedCode(code);
+  // }, [canvasTree]);
+
+  useKeyboardShortcuts();
+
   useEffect(() => {
-    const code = generateCodeFromTree(canvasTree);
-    setGeneratedCode(code);
-  }, [canvasTree]);
+    const interval = setInterval(() => {
+      perfMonitor.report();
+    }, 30000); // Report every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>

@@ -1,3 +1,4 @@
+import React from "react";
 import { useCallback } from "react";
 import { DraggableComponent } from "./Draggable";
 import { componentRegistry } from "@/lib/componentRegistry";
@@ -5,13 +6,15 @@ import { ComponentNode } from "@/types/component-nodes";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { useFileSystemStore } from "@/stores/useFileSystemStore";
 import { cn } from "@/lib/utils";
-import { propSchemas } from "@/lib/componentSchema"; // Import propSchemas
+import { propSchemas } from "@/lib/componentSchema";
+import { ComponentContextMenu } from "./ComponentContextMenu";
+
 
 interface ComponentWrapperProps {
   node: ComponentNode;
 }
 
-export function ComponentWrapper({ node }: ComponentWrapperProps) {
+export const ComponentWrapper = React.memo(({ node }: ComponentWrapperProps) => {
   const { selectComponent, selectedId, addComponentToParent, moveComponent, nestingMode, nestingTargetId, performNesting, expandedParentId, selectedTabItemIds } = useCanvasStore();
   const { root } = useFileSystemStore();
 
@@ -48,8 +51,8 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
 
   const isChild = !!node.parentId;
 
-  const handlePositionChange = useCallback((newPosition: { x: number; y: number }) => {
-    moveComponent(node.id, newPosition.x, newPosition.y);
+  const handleDragEnd = useCallback((finalPosition: { x: number; y: number }) => {
+    moveComponent(node.id, finalPosition.x, finalPosition.y);
   }, [node.id, moveComponent]);
 
   // ✂️ Helper: Find canvasTree for a custom component
@@ -111,27 +114,22 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
       ...stylingClasses // Add all collected styling classes last to ensure they override
     );
 
-    const commonProps = {
-      onClick: handleClick,
-      onContextMenu: handleContextMenu,
-      className: combinedClassName,
-      ...otherProps, // Spread other non-styling props
-    };
+    const presentationProps = { ...otherProps, className: combinedClassName };
 
     const content = (
       VOID_ELEMENTS.includes(node.type) ? (
-        <Comp {...commonProps} />
+        <Comp {...presentationProps} />
       ) : node.type === "Tabs" ? (
-        <Comp {...commonProps}>
+        <Comp {...presentationProps}>
           {node.children?.map((child) => (
             <ComponentWrapper key={child.id} node={child} /> // Reverted Tabs children rendering
           ))}
         </Comp>
       ) : node.type === "Textarea" ? (
-        <Comp {...commonProps} defaultValue={node.props.children || ''}>
+        <Comp {...presentationProps} defaultValue={node.props.children || ''}>
         </Comp>
       ) : (
-        <Comp {...commonProps}>
+        <Comp {...presentationProps}>
           {node.type !== 'Alert' && node.props.children}
           {isTabsContentEmpty && <div className="text-center text-gray-400 p-4">Drop components here</div>}
           {node.children?.map((child) => (
@@ -155,11 +153,16 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
       return (
         <DraggableComponent
           initialPosition={{ x: node.x ?? 0, y: node.y ?? 0 }}
-          onPositionChange={handlePositionChange}
+          onDragEnd={handleDragEnd}
           isSelected={isSelected}
-          {...commonProps}
+          onClick={handleClick}
+          onContextMenu={handleContextMenu}
         >
-          {content}
+          <ComponentContextMenu
+            componentId={node.id}
+          >
+                      {content}
+          </ComponentContextMenu>
         </DraggableComponent>
       );
     }
@@ -192,4 +195,15 @@ export function ComponentWrapper({ node }: ComponentWrapperProps) {
       Unknown: {node.type}
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Compare positions too!
+  return (
+    prevProps.node.id === nextProps.node.id &&
+    prevProps.node.x === nextProps.node.x &&
+    prevProps.node.y === nextProps.node.y &&
+    JSON.stringify(prevProps.node.props) === JSON.stringify(nextProps.node.props) &&
+    prevProps.node.children?.length === nextProps.node.children?.length
+  );
+});
+
+ComponentWrapper.displayName = `ComponentWrapper`;
