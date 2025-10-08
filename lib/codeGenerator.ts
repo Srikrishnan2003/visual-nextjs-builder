@@ -1,5 +1,6 @@
 import { ComponentNode } from "@/types/component-nodes";
 import { componentRegistry } from "@/lib/componentRegistry";
+import { importMap, componentGroupMap } from "./importMap";
 
 // Utility to format custom component name (capitalize first letter)
 function formatComponentName(name: string | undefined | null) {
@@ -32,7 +33,7 @@ function generateCode(
     .filter(Boolean)
     .join(" ");
 
-  const idProp = `id="${node.id}"`;
+  const idProp = `id=\" ${node.id}\"`;
   const finalPropString = [idProp, propString].filter(Boolean).join(" ");
 
   // Check if this is a custom component
@@ -55,8 +56,6 @@ function generateCode(
     .map((child) => generateCode(child, indentLevel + 1, usedCustomComponents))
     .join("\n");
 
-  // If there are actual nested components, prioritize them.
-  // The 'children' prop (text content) is usually a placeholder for containers.
   const contentToRender = nestedComponentsCode
     ? nestedComponentsCode
     : (textContent ? indent + "  " + textContent + "\n" : "");
@@ -68,24 +67,65 @@ function generateCode(
   }
 }
 
+function getAllComponentTypes(tree: ComponentNode[]): Set<string> {
+    const types = new Set<string>();
+    function traverse(nodes: ComponentNode[]) {
+        for (const node of nodes) {
+            types.add(node.type);
+            if (node.children) {
+                traverse(node.children);
+            }
+        }
+    }
+    traverse(tree);
+    return types;
+}
+
 // Main function to generate full code with imports
 export function generateCodeFromTree(tree: ComponentNode[]): string {
   const usedCustomComponents = new Set<string>();
 
   const jsx = tree
-    .map((node) => generateCode(node, 0, usedCustomComponents))
+    .map((node) => generateCode(node, 3, usedCustomComponents))
     .join("\n");
 
-  // Wrap multiple root-level components in a React Fragment
-  const wrappedJsx = tree.length > 1 ? `<>
-${jsx}
-</>` : jsx;
+  const wrappedJsx = tree.length > 1 ? `      <>\n${jsx}\n      </>` : jsx;
 
-  const imports = Array.from(usedCustomComponents)
+  const allTypes = getAllComponentTypes(tree);
+  const standardImports = new Set<string>();
+  for (const componentType of allTypes) {
+      if (componentRegistry[componentType]) { // It's a standard component
+        const group = componentGroupMap[componentType];
+        const importStatement = importMap[group || componentType];
+        if (importStatement) {
+            standardImports.add(importStatement);
+        }
+      }
+  }
+
+  const customImports = Array.from(usedCustomComponents)
     .map((name) => `import ${name} from "./components/${name}";`)
     .join("\n");
 
-  return `${imports ? imports + "\n\n" : ""}${wrappedJsx}`;
+  const allImports = [
+    ...Array.from(standardImports),
+    customImports
+  ].filter(Boolean).join('\n');
+
+  const template = `'use client';
+
+import React from 'react';
+${allImports}
+
+export default function Page() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+${wrappedJsx}
+    </main>
+  );
+}
+`;
+  return template;
 }
 
 export function generateCodeForNode(node: ComponentNode): string {

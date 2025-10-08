@@ -141,10 +141,8 @@ export const ComponentWrapper = React.memo(({ node }: ComponentWrapperProps) => 
 
     if (isChild) {
       // If it's a child, don't make it draggable, let parent layout handle it
-      const propsForDiv = { ...commonProps };
-      delete propsForDiv.collapsible;
       return (
-        <div {...propsForDiv}>
+        <div onClick={handleClick} onContextMenu={handleContextMenu}>
           {content}
         </div>
       );

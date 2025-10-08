@@ -24,10 +24,10 @@ export default function Home() {
   const { canvasTree } = useCanvasStore();
   const [generatedCode, setGeneratedCode] = useState<string>("");
 
-  // useEffect(() => {
-  //   const code = generateCodeFromTree(canvasTree);
-  //   setGeneratedCode(code);
-  // }, [canvasTree]);
+  useEffect(() => {
+    const code = generateCodeFromTree(canvasTree);
+    setGeneratedCode(code);
+  }, [canvasTree]);
 
   useKeyboardShortcuts();
 

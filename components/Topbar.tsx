@@ -1,6 +1,6 @@
 'use client';
 
-import { Rocket, Laptop, Tablet, Smartphone, Undo2, Redo2, X, Save, FolderOpen } from "lucide-react";
+import { Laptop, Tablet, Smartphone, Undo2, Redo2, X, Save, FolderOpen } from "lucide-react";
 import ExportZipButton from "./ExportZipButton";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "./ui/toast";
 import { ProjectDialog } from './dialogs/ProjectDialog';
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Topbar() {
     const [projectDialogMode, setProjectDialogMode] = useState<'save' | 'load' | null>(null);
@@ -30,9 +31,10 @@ export default function Topbar() {
     return (
         <div className="w-full h-16 px-6 border-b border-slate-200 bg-white/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-                <Rocket className="text-blue-600" size={28} />
+                <Image src="/Logo.png" alt="Build Realm Logo" width={28} height={28} />
+                
                 <h1 className="text-2xl font-bold text-slate-800 tracking-tighter">
-                    Canvas Builder
+                    Build Realm
                 </h1>
             </div>
 
